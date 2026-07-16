@@ -1,2 +1,2 @@
 # QwenRPC
-QwenRPC(Qinwen's Remote Procedure Call) 远程服务框架
+QwenRPC(Qinwen's Remote Procedure Call) C++ 高性能远程服务框架
