@@ -1,4 +1,4 @@
-# 📘 [笔记 01] C++实现轻量级RPC分布式网络通信框架 (Lightweight C++ RPC Distributed Network Framework)
+# 📘 C++实现轻量级RPC分布式网络通信框架
 
 > 来源说明：CSDN 博客《C++实现轻量级RPC分布式网络通信框架》，作者 Yugang_Yang (T_Solotov)，2022-04
 > 原文链接：<https://blog.csdn.net/T_Solotov/article/details/124107667>
@@ -51,6 +51,25 @@
   2. Caller 发起调用时先查询目标服务所在的服务器地址
   3. Caller 通过网络向 Callee 发送调用请求
   4. Callee 执行本地方法，将结果通过网络返回给 Caller
+
+下图把上述 4 步流程细化到 `桩(Stub)` 与序列化层面，共 7 步——对调用方来说，第 2~7 步全部由框架完成：
+
+```mermaid
+sequenceDiagram
+    participant C as 调用方 Caller
+    participant S as 桩 Stub
+    participant R as 注册中心<br>(服务发现)
+    participant P as 提供方 Callee
+
+    Note over P,R: 服务启动时：注册 服务名 → IP:Port
+    C->>S: 1. 调用 stub.Login(request)
+    S->>R: 2. 查询 Login 服务的地址
+    R-->>S: 3. 返回目标服务器 IP:Port
+    S->>P: 4. 请求序列化后经 TCP 发送
+    P->>P: 5. 反序列化 → 定位方法 → 执行本地函数
+    P-->>S: 6. 结果序列化后返回
+    S-->>C: 7. 反序列化，像本地函数一样拿到返回值
+```
 
 **注意点**
 > 💡 **理解技巧**：RPC 的本质 = **函数调用的语义 + 网络传输的实现**。业务代码只看到 `stub.Login(request, response)`，底下的序列化、寻址、TCP 收发全被框架"藏"起来了。
