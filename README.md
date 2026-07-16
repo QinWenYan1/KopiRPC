@@ -1,6 +1,6 @@
 # QwenRPC
 
-QwenRPC (Qinwen's Remote Procedure Call) —— C++ 高性能远程服务框架
+>QwenRPC (Qinwen's Remote Procedure Call) —— C++ 高性能远程程序调用服务框架
 
 ---
 
@@ -49,14 +49,15 @@ QwenRPC (Qinwen's Remote Procedure Call) —— C++ 高性能远程服务框架
 
 --- 
 
+## 📚 学习笔记
+
+- 想了解 RPC 的奥秘，推荐参考以下学习笔记：
+    - [01 - C++实现轻量级RPC分布式网络通信框架（ZooKeeper + ProtoBuf + Muduo）](notes/01-RPC框架实现-ZooKeeper-ProtoBuf-Muduo.md)
+
+---
+
 ## 🗺️ Roadmap
 
 - 尽情期待
 
-## 📚 学习笔记
 
-- [01 - C++实现轻量级RPC分布式网络通信框架（ZooKeeper + ProtoBuf + Muduo）](notes/01-RPC框架实现-ZooKeeper-ProtoBuf-Muduo.md)
-
-## 📄 License
-
-[Apache-2.0](LICENSE)
