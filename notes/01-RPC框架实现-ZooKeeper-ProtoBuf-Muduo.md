@@ -92,14 +92,18 @@
 | `Muduo` | **网络通信库** | 基于 `(Multi-)Reactor` 模型的多线程网络库，高并发处理远端请求 |
 
 **各组件协作方式：**
-- **ZooKeeper**：服务方法提供者提前将本端对外提供的**服务方法名及自己的通信地址信息（IP:Port）注册到 ZooKeeper**。Caller 发起调用时，先向 ZooKeeper 查询目标服务所在的服务器地址，再向该服务器（Callee）发起请求
-- **ProtoBuf**：Caller 和 Callee 之间的数据交互全部先经 ProtoBuf 序列化成二进制字节流再走网络
-- **Muduo**：承担 RPC 框架中的网络通信部分（监听、连接、收发），**原文默认读者已熟悉 Muduo 库**
+- **ZooKeeper**：
+  - 服务方法提供者提前将本端对外提供的**服务方法名及自己的通信地址信息（IP:Port）注册到 ZooKeeper**。
+  - Caller 发起调用时，先向 ZooKeeper 查询目标服务所在的服务器地址，再向该服务器（Callee）发起请求
+- **[ProtoBuf](https://protobuf.com.cn/overview/)**：
+  - Caller 和 Callee 之间的数据交互全部先经 ProtoBuf 序列化成二进制字节流再走网络
+- **Muduo**：
+  - 承担 RPC 框架中的网络通信部分（监听、连接、收发）
 
 **注意点**
 > ⚠️ **关键区分**：三者职责**完全正交**——ZooKeeper 只管"找到谁"，ProtoBuf 只管"说什么格式"，Muduo 只管"怎么送到"。设计 QwenRPC 时应保持这种分层解耦。
 > 💡 **理解技巧**：类比寄快递——ZooKeeper 是地址簿，ProtoBuf 是打包规范，Muduo 是快递员。
-> 📋 **术语提醒**：`Reactor 模型(Reactor Pattern)` = 基于事件驱动的 I/O 多路复用架构；`Multi-Reactor` 指主 Reactor 负责接受连接、多个子 Reactor 负责已连接 socket 的读写。
+
 
 ---
 
