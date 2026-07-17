@@ -53,8 +53,11 @@
 ## 📚 学习笔记
 
 - 想揭开 RPC 的奥秘，推荐参考以下学习笔记：
-    - [01 - 高性能网络编程基础知识（I/O 多路复用，poll/select/epoll，Reactor/Proactor）](https://github.com/QinWenYan1/Network_System/tree/main/Chapter02_Application_Layer)
-    - [02 - C++实现轻量级RPC分布式网络通信框架（ZooKeeper + ProtoBuf + Muduo）](notes/01-RPC框架实现-ZooKeeper-ProtoBuf-Muduo.md)
+    - [01 - C++实现轻量级RPC分布式网络通信框架（ZooKeeper + ProtoBuf + Muduo）](notes/01-RPC框架实现-ZooKeeper-ProtoBuf-Muduo.md)
+    - [02 - Protocol Buffers 概览](notes/02-Protocol-Buffers-概览.md)
+
+- 前置网络知识补充：
+    - [高性能网络编程基础知识（I/O 多路复用，poll/select/epoll，Reactor/Proactor）](https://github.com/QinWenYan1/Network_System/tree/main/Chapter02_Application_Layer)
 
 
 ---
