@@ -112,55 +112,57 @@
 
 **一份 `.proto` 文件，protoc 编译后生成"孪生两类"——理解这对类的分工是理解整个框架的钥匙**
 
-原文通过一个 Login/Register 业务场景展示框架用法：先在 `.proto` 中定义消息体和服务，再用 protoc 编译生成 C++ 代码。
+- 通过一个 Login/Register 业务场景展示框架用法：
+  1. 先在 `.proto` 中定义消息体和服务
+  2. 再用 protoc 编译生成 C++ 代码。
 
-**协议定义（`user.proto`）：**
-- 定义的消息体：`LoginRequest`、`LoginResponse`、`RegisterResponse`（内部嵌套 `ResultCode` 错误码消息）
-- 注册服务：`service UserServiceRpc`，包含 `Login` 和 `Register` 两个 rpc 方法
+- **协议定义（`user.proto`）：**
+  - 定义的消息体：`LoginRequest`、`LoginResponse`、`RegisterResponse`（内部嵌套 `ResultCode` 错误码消息）
+  - 注册服务：`service UserServiceRpc`，包含 `Login` 和 `Register` 两个 rpc 方法
 
-**示例/实践**
-```protobuf
-// user.proto —— 依据原文整理（原文为代码截图）
-syntax = "proto3";
-package fixbug;
+- **示例/实践**
+  ```protobuf
+  // user.proto —— 依据原文整理（原文为代码截图）
+  syntax = "proto3";
+  package fixbug;
 
-option cc_generic_services = true;   // 生成 service 类（Stub 与 Service）
+  option cc_generic_services = true;   // 生成 service 类（Stub 与 Service）
 
-message ResultCode {                 // 嵌套在响应中的错误码
-    int32 errcode = 1;
-    bytes errmsg  = 2;
-}
+  message ResultCode {                 // 嵌套在响应中的错误码
+      int32 errcode = 1;
+      bytes errmsg  = 2;
+  }
 
-message LoginRequest {
-    bytes name = 1;
-    bytes pwd  = 2;
-}
+  message LoginRequest {
+      bytes name = 1;
+      bytes pwd  = 2;
+  }
 
-message LoginResponse {
-    ResultCode result = 1;
-    bool success      = 2;
-}
+  message LoginResponse {
+      ResultCode result = 1;
+      bool success      = 2;
+  }
 
-// 在 proto 中注册服务及其方法
-service UserServiceRpc {
-    rpc Login (LoginRequest) returns (LoginResponse);
-    rpc Register (RegisterRequest) returns (RegisterResponse);
-}
-```
+  // 在 proto 中注册服务及其方法
+  service UserServiceRpc {
+      rpc Login (LoginRequest) returns (LoginResponse);
+      rpc Register (RegisterRequest) returns (RegisterResponse);
+  }
+  ```
 
-```bash
-# 编译命令（原文）
-protoc user.proto -I ./ --cpp_out=./user
-```
+  ```bash
+  # 编译命令（原文）
+  protoc user.proto -I ./ --cpp_out=./user
+  ```
 
-**编译生成的两个关键类：**
-- `UserServiceRpc_Stub`：**给 Caller 用**——桩类，持有 channel，把方法调用转发到网络
-- `UserServiceRpc`：**给 Callee 用**——服务基类，业务方**继承它并重写虚方法**提供真正实现
+- **编译生成的两个关键类：**
+  - `UserServiceRpc_Stub`：**给 Caller 用**——桩类，持有 channel，把方法调用转发到网络
+  - `UserServiceRpc`：**给 Callee 用**——服务基类，业务方**继承它并重写虚方法**提供真正实现
 
-**注意点**
+
 > ⚠️ **关键区分**：`Stub` 类与 `Service` 类是同一服务的两面——**Stub 在调用端"假装是函数"，Service 在提供端"真正干活"**。两者接口签名一致，由同一份 proto 生成。
 > 💡 **理解技巧**：`桩(Stub)` 一词源于"树桩"——看起来是完整的树（函数），实际只是留在本地的一小截，真正的"树干"在远端。
-> 📋 **术语提醒**：`序列化(Serialization)` / `反序列化(Deserialization)`；`服务描述符(ServiceDescriptor)`、`方法描述符(MethodDescriptor)` 将在知识点7 中用于反射。
+
 
 ---
 
