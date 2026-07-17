@@ -42,7 +42,7 @@
 
 **RPC 要解决的核心问题：如何让客户端像调用本地函数一样，调用远端服务器上的函数？**
 
-分布式系统中服务分散在不同机器上，直接裸写网络编程（socket、序列化、寻址）成本极高。RPC 框架把这些细节全部封装起来，向业务层提供"透明调用"的体验。
+- 分布式系统中服务分散在不同机器上，直接裸写网络编程（socket、序列化、寻址）成本极高。RPC 框架把这些细节全部封装起来，向业务层提供"透明调用"的体验
 
 - `远程过程调用(RPC, Remote Procedure Call)`：允许客户端程序**像调用本地函数一样**直接调用远端服务器上的函数
 - 两个核心角色：
@@ -53,30 +53,30 @@
   2. Caller 发起调用时先查询目标服务所在的服务器地址
   3. Caller 通过网络向 Callee 发送调用请求
   4. Callee 执行本地方法，将结果通过网络返回给 Caller
+  ![图片来自作者“我在地铁站吃闸机”](images/1.png)
 
-下图把上述 4 步流程细化到 `桩(Stub)` 与序列化层面，共 7 步——对调用方来说，第 2~7 步全部由框架完成：
+- 下图把上述 4 步流程细化到 `桩(Stub)` 与序列化层面，共 7 步——对调用方来说，第 2~7 步全部由框架完成：
 
-```mermaid
-sequenceDiagram
-    participant C as 调用方 Caller
-    participant S as 桩 Stub
-    participant R as 注册中心<br>(服务发现)
-    participant P as 提供方 Callee
+  ```mermaid
+  sequenceDiagram
+      participant C as 调用方 Caller
+      participant S as 桩 Stub
+      participant R as 注册中心<br>(服务发现)
+      participant P as 提供方 Callee
 
-    Note over P,R: 服务启动时：注册 服务名 → IP:Port
-    C->>S: 1. 调用 stub.Login(request)
-    S->>R: 2. 查询 Login 服务的地址
-    R-->>S: 3. 返回目标服务器 IP:Port
-    S->>P: 4. 请求序列化后经 TCP 发送
-    P->>P: 5. 反序列化 → 定位方法 → 执行本地函数
-    P-->>S: 6. 结果序列化后返回
-    S-->>C: 7. 反序列化，像本地函数一样拿到返回值
-```
+      Note over P,R: 服务启动时：注册 服务名 → IP:Port
+      C->>S: 1. 调用 stub.Login(request)
+      S->>R: 2. 查询 Login 服务的地址
+      R-->>S: 3. 返回目标服务器 IP:Port
+      S->>P: 4. 请求序列化后经 TCP 发送
+      P->>P: 5. 反序列化 → 定位方法 → 执行本地函数
+      P-->>S: 6. 结果序列化后返回
+      S-->>C: 7. 反序列化，像本地函数一样拿到返回值
+  ```
 
-**注意点**
-> 💡 **理解技巧**：RPC 的本质 = **函数调用的语义 + 网络传输的实现**。业务代码只看到 `stub.Login(request, response)`，底下的序列化、寻址、TCP 收发全被框架"藏"起来了。
-> 🔄 **知识关联**：这正是 QwenRPC 要实现的目标——见 [知识点14](#id14) 的迭代方向。
-> 📋 **术语提醒**：`调用方(Caller)` 有时也称 `消费者(Consumer)`；`提供方(Callee)` 也称 `生产者(Provider)`，原文框架中服务端核心类即命名为 `RpcProvider`。
+
+> 💡 **理解技巧**：RPC 的本质 = **函数调用的语义 + 网络传输的实现**。业务代码只看到 `stub.Login(request, response)`，底下的序列化、寻址、TCP 收发全被框架"藏"起来了
+
 
 ---
 
