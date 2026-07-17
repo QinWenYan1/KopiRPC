@@ -92,7 +92,7 @@
 | `Muduo` | **网络通信库** | 基于 `(Multi-)Reactor` 模型的多线程网络库，高并发处理远端请求 |
 
 **各组件协作方式：**
-- **ZooKeeper**：
+- **[ZooKeeper](https://zookeeper.apache.org/)**：
   - 服务方法提供者提前将本端对外提供的**服务方法名及自己的通信地址信息（IP:Port）注册到 ZooKeeper**。
   - Caller 发起调用时，先向 ZooKeeper 查询目标服务所在的服务器地址，再向该服务器（Callee）发起请求
 - **[ProtoBuf](https://protobuf.com.cn/overview/)**：
