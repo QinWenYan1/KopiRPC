@@ -1,0 +1,53 @@
+# QwenRPC 完整开发镜像
+# 基于 Ubuntu 22.04，包含 C++ 工具链、Protobuf、Muduo、ZooKeeper C client
+# 用途：QwenRPC 本地 Docker 开发环境
+
+FROM ubuntu:22.04
+
+# 避免交互式配置提示
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Shanghai
+
+# 安装基础工具、C++ 编译工具链、Protobuf、Boost、glog、ZooKeeper C client
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    gdb \
+    vim \
+    curl \
+    wget \
+    ca-certificates \
+    pkg-config \
+    # Protobuf 开发库和编译器
+    libprotobuf-dev \
+    protobuf-compiler \
+    # Muduo 依赖
+    libboost-all-dev \
+    libboost-dev \
+    libz-dev \
+    # ZooKeeper C client 和服务端
+    libzookeeper-mt-dev \
+    zookeeperd \
+    # 日志库
+    libgoogle-glog-dev \
+    # 性能分析（可选）
+    libgoogle-perftools-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# 从源码编译并安装 Muduo 到 /usr/local
+RUN git clone https://github.com/chenshuo/muduo.git /tmp/muduo && \
+    cd /tmp/muduo && \
+    mkdir build && cd build && \
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=release .. && \
+    make -j$(nproc) && \
+    make install && \
+    ldconfig && \
+    cd / && rm -rf /tmp/muduo
+
+# 设置工作目录
+WORKDIR /workspace
+
+# 默认进入 bash
+CMD ["/bin/bash"]
