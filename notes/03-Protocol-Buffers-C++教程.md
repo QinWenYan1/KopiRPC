@@ -298,28 +298,63 @@
 
 **`.proto` 中的枚举和嵌套消息会被编译器生成对应的 C++ 枚举和嵌套类。**
 
-### 枚举
+- **枚举**
 
-- `.proto` 中的 `enum PhoneType` 生成 C++ 枚举 `Person::PhoneType`。
-- 枚举值名称前会加上类型前缀，如：
-  - `Person::PHONE_TYPE_MOBILE`
-  - `Person::PHONE_TYPE_HOME`
-  - `Person::PHONE_TYPE_WORK`
+  - `.proto` 中的 `enum PhoneType` 生成 C++ 枚举 `Person::PhoneType`
+  - 枚举值名称前会加上类型前缀，如：
+    - `Person::PHONE_TYPE_MOBILE`
+    - `Person::PHONE_TYPE_HOME`
+    - `Person::PHONE_TYPE_WORK`
 
-### 嵌套类
+- **嵌套类**
 
-- `.proto` 中嵌套定义的 `message PhoneNumber` 生成嵌套类 `Person::PhoneNumber`。
-- 实际生成的类名是 `Person_PhoneNumber`。
-- Protobuf 在 `Person` 内部定义了 typedef，因此可以当作 `Person::PhoneNumber` 使用。
+  - `.proto` 中嵌套定义的 `message PhoneNumber` 生成嵌套类 `Person::PhoneNumber`
+  - 实际生成的类名是 `Person_PhoneNumber`
+  - Protobuf 在 `Person` 内部定义了 typedef，因此可以当作 `Person::PhoneNumber` 使用
 
-### 前向声明的限制
+- **前向声明的限制**
 
-- 不能在 C++ 中前向声明嵌套类型 `Person::PhoneNumber`。
-- 但可以前向声明实际的类名 `Person_PhoneNumber`。
+  - 不能在 C++ 中前向声明嵌套类型 `Person::PhoneNumber`
+  - 但可以前向声明实际的类名 `Person_PhoneNumber`
 
-**注意点**
+**示例/实践**
+
+- protoc 生成的代码（概念示意）——**不是真嵌套类，而是「压平 + typedef」**：
+
+  ```cpp
+  // 真实生成的类：全局类，名字用下划线压平
+  class Person_PhoneNumber : public google::protobuf::Message { ... };
+
+  // Person 类内部只放了一行 typedef（别名）
+  class Person : public google::protobuf::Message {
+  public:
+    typedef Person_PhoneNumber PhoneNumber;
+    ...
+  };
+  ```
+
+- 日常使用：两个名字**完全等价**，推荐用别名（可读性好）：
+
+  ```cpp
+  tutorial::Person::PhoneNumber phone1;   // 别名
+  tutorial::Person_PhoneNumber phone2;    // 真名，与上行是同一个类
+  Person::PhoneNumber* p = person.add_phones();  // 教程写法走的就是别名
+  ```
+
+- 前向声明场景：头文件里只想「预告」类名、不想 `#include` 整个 `.pb.h` 时，**只能用真名**：
+
+  ```cpp
+  namespace tutorial {
+  class Person_PhoneNumber;      // ✅ 合法：真名是独立的顶层类
+  // class Person::PhoneNumber;  // ❌ 编译错误：别名写在 Person 类体内，
+                                 //    不看 Person 完整定义就无法引用
+  }
+  void PrintPhone(const tutorial::Person_PhoneNumber* phone);
+  ```
+
 > ⚠️ **关键区分**：日常写代码用 `Person::PhoneNumber`，前向声明时要用 `Person_PhoneNumber`。
 > 💡 **理解技巧**：`typedef` 就是给 `Person_PhoneNumber` 起了一个别名 `Person::PhoneNumber`，方便使用。
+> 💡 **设计原因**：protoc 故意「压平 + typedef」而非生成真嵌套类，正是为了让前向声明成为可能——真嵌套类无论如何都无法前向声明。
 > 📋 **术语提醒**：`前向声明（forward declaration）` 是在不给出完整定义的情况下声明一个类存在。
 
 ---
@@ -329,20 +364,19 @@
 
 **每个消息类还包含检查或操作整个消息的方法，这些方法实现了 `Message` 接口。**
 
-常用标准方法：
+- 常用标准方法：
+  - `bool IsInitialized() const;`
+    - 检查所有必填字段是否已设置
+  - `string DebugString() const;`
+    - 返回消息的可读表示，对调试特别有用
+  - `void CopyFrom(const Person& from);`
+    - 用给定消息的值覆盖当前消息
+  - `void Clear();`
+    - 将所有元素清除回空状态
 
-- `bool IsInitialized() const;`
-  - 检查所有必填字段是否已设置。
-- `string DebugString() const;`
-  - 返回消息的可读表示，对调试特别有用。
-- `void CopyFrom(const Person& from);`
-  - 用给定消息的值覆盖当前消息。
-- `void Clear();`
-  - 将所有元素清除回空状态。
+- 这些方法以及 I/O 方法实现了所有 C++ Protocol Buffer 类共享的 `Message` 接口
 
-这些方法以及 I/O 方法实现了所有 C++ Protocol Buffer 类共享的 `Message` 接口。
 
-**注意点**
 > ⚠️ **关键区分**：`Clear()` 清除整个消息的所有字段；`clear_xxx()` 只清除单个字段。
 > 💡 **理解技巧**：`DebugString()` 是你调试时的好朋友，可以像 `std::cout << person.DebugString()` 这样打印消息内容。
 > 📋 **术语提醒**：`Message` 是 Protobuf C++ 运行时中所有生成消息类的公共基类接口。
@@ -381,7 +415,7 @@
 <a id="id11"></a>
 ## ✅ 知识点11: 写入消息的完整流程
 
-**地址簿程序首先将个人详细信息写入地址簿文件：读取旧文件 → 添加新人 → 写回文件。**
+**地址簿程序首先将个人详细信息写入地址簿文件：读取旧文件 → 添加新人 → 写回文件**
 
 FSM 风格流程：
 
