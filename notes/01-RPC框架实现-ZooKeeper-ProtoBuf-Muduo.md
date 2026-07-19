@@ -3,14 +3,14 @@
 > 来源说明：CSDN 博客《C++实现轻量级RPC分布式网络通信框架》，作者 Yugang_Yang (T_Solotov)，2022-04
 > 原文链接：<https://blog.csdn.net/T_Solotov/article/details/124107667>
 > 项目源码：<https://github.com/yyg192/yyg_rpc_server>
-> 本篇涵盖：基于 `ZooKeeper + ProtoBuf + Muduo` 从零搭建 RPC 框架的完整设计与实现，作为 **QwenRPC** 开发的理论参考。
+> 本篇涵盖：基于 `ZooKeeper + ProtoBuf + Muduo` 从零搭建 RPC 框架的完整设计与实现，作为 **KopiRPC** 开发的理论参考。
 > 说明：原文部分代码以截图形式呈现，无法逐字提取；此类代码块依据原文流程描述整理，已标注 `// 依据原文整理`。
 
 ---
 
 ## 🧠 核心概念总览（严格按原文顺序）
 
-> 📎 返回：[QwenRPC 仓库首页](../README.md)
+> 📎 返回：[KopiRPC 仓库首页](../README.md)
 
 **一、理论基础**
 - [*知识点1: RPC 核心概念与整体架构*](#id1)
@@ -608,19 +608,18 @@ protoc 生成的 `UserServiceRpc_Stub::Login` 内部只做一件事：调用 `ch
 
 **注意点**
 > 💡 **理解技巧**：磁盘 I/O 比内存操作慢几个数量级——若在网络回调里直接写文件，高并发下事件循环会被拖垮。
-> 🔄 **知识关联**：Muduo 库本身的 `AsyncLogging` 也是同样的设计思想（双缓冲 + 后台线程），QwenRPC 可参考。
 > 📋 **术语提醒**：`异步日志(Asynchronous Logging)`；队列需要**线程安全**（互斥锁 + 条件变量）。
 
 ---
 
 <a id="id14"></a>
-## ✅ 知识点14: 待完善功能 → QwenRPC Roadmap
+## ✅ 知识点14: 待完善功能 → KopiRPC Roadmap
 
-**原文作者列出的"未完成清单"，恰好是 QwenRPC 可以超越参考项目的迭代方向**
+**原文作者列出的"未完成清单"，恰好是 KopiRPC 可以超越参考项目的迭代方向**
 
 原文明确指出该框架**尚处于迭代中**，以下功能未实现：
 
-| 待实现功能 | 说明 | 对 QwenRPC 的意义 |
+| 待实现功能 | 说明 | 对 KopiRPC 的意义 |
 |-----------|------|------------------|
 | `客户端异步调用(Async Call)` | 当前 CallMethod 为同步阻塞 | 可引入 future/promise 或回调式 API |
 | `负载均衡(Load Balancing)` | 同一服务多实例时如何选择 | ZK 下挂多个地址 + 轮询/随机/一致性哈希策略 |

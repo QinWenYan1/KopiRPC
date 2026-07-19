@@ -5,12 +5,12 @@
 
 ## 项目概述
 
-**QwenRPC**（Qinwen's Remote Procedure Call）是一个计划用 C++ 实现的高性能 RPC（远程过程调用）框架，许可证为 Apache 2.0。
+**KopiRPC**（Qinwen's Remote Procedure Call）是一个计划用 C++ 实现的高性能 RPC（远程过程调用）框架，许可证为 Apache 2.0。
 
 **当前阶段：理论学习 / 预实现阶段。** 仓库中**没有任何源代码、构建系统、测试或 CI 配置**。现存内容只有文档：
 
 ```
-QwenRPC/
+KopiRPC/
 ├── README.md          # 面向读者的中文介绍：什么是 RPC、为什么需要 RPC、应用场景、学习笔记链接、Roadmap
 ├── CLAUDE.md          # 给 Claude Code 的英文指南（仓库约定、当前状态）
 ├── AGENTS.md          # 本文件
@@ -55,7 +55,7 @@ QwenRPC/
 
 ## 路线图（Roadmap）
 
-参考项目未实现、QwenRPC 计划迭代的方向（见 `notes/01` 知识点14）：客户端异步调用、负载均衡、异常重试、健康检测、熔断机制、长连接/连接池。README 中的 Roadmap 一节目前仅写"尽情期待"。
+参考项目未实现、KopiRPC 计划迭代的方向（见 `notes/01` 知识点14）：客户端异步调用、负载均衡、异常重试、健康检测、熔断机制、长连接/连接池。README 中的 Roadmap 一节目前仅写"尽情期待"。
 
 ## 仓库约定（重要）
 

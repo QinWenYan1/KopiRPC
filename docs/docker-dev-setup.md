@@ -1,6 +1,6 @@
-# 🐳 QwenRPC Docker 开发环境
+# 🐳 KopiRPC Docker 开发环境
 
-> 本文档介绍如何使用 Docker 快速搭建 QwenRPC 的开发环境。
+> 本文档介绍如何使用 Docker 快速搭建 KopiRPC 的开发环境。
 >
 > 镜像定位：**开发 / CI / 测试** 用途，**不是生产镜像**。
 
@@ -21,7 +21,7 @@
 
 ## 镜像里有什么
 
-本镜像基于 Ubuntu 22.04 LTS，预装了 QwenRPC 开发所需的全部依赖：
+本镜像基于 Ubuntu 22.04 LTS，预装了 KopiRPC 开发所需的全部依赖：
 
 | 组件 | 版本/说明 |
 |---|---|
@@ -72,7 +72,7 @@ docker pull cspenguin/qwenrpc-dev:v0.1.0
 
 ```bash
 # 进入项目根目录
-cd QwenRPC
+cd KopiRPC
 
 # 构建镜像
 docker build -f docker/Dockerfile.dev -t qwenrpc-dev .

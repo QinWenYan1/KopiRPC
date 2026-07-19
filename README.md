@@ -1,6 +1,6 @@
-# QwenRPC
+# KopiRPC
 
->QwenRPC (Qinwen's Remote Procedure Call) —— C++ 高性能远程程序调用服务框架
+>KopiRPC (Kopi Remote Procedure Call) —— C++ 高性能远程程序调用服务框架
 
 ---
 

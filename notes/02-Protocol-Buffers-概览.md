@@ -5,7 +5,7 @@
 ---
 
 ## 🧠 核心概念总览（严格按原文顺序）
-> 📎 返回：[QwenRPC 仓库首页](../README.md)
+> 📎 返回：[KopiRPC 仓库首页](../README.md)
 
 - [*知识点1: Protobuf 解决了哪些问题*](#id1)
 - [*知识点2: Protobuf 的定义与核心组成*](#id2)
@@ -205,7 +205,7 @@
   - **Envoy Proxy**：云原生高性能代理，使用 Protobuf 进行配置与通信
 
 > 💡 **理解技巧**：看到某个项目支持 `.proto` 配置或接口定义，往往意味着它在用 Protobuf。
-> 🔄 **知识关联**：在 QwenRPC 中，ProtoBuf 正是作为 gRPC 风格的接口定义与序列化方案被引入的。
+> 🔄 **知识关联**：在 KopiRPC 中，ProtoBuf 正是作为 gRPC 风格的接口定义与序列化方案被引入的。
 
 ---
 

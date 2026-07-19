@@ -1,6 +1,6 @@
-# QwenRPC 完整开发镜像
+# KopiRPC 完整开发镜像
 # 基于 Ubuntu 22.04，包含 C++ 工具链、Protobuf、Muduo、ZooKeeper C client
-# 用途：QwenRPC 本地 Docker 开发环境
+# 用途：KopiRPC 本地 Docker 开发环境
 
 FROM ubuntu:22.04
 

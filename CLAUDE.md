@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-QwenRPC (Qinwen's Remote Procedure Call) is a high-performance C++ RPC framework. Licensed under Apache 2.0.
+KopiRPC (Qinwen's Remote Procedure Call) is a high-performance C++ RPC framework. Licensed under Apache 2.0.
 
 The project is in the **theory-learning / pre-implementation phase** — no source code or build system exists yet. The planned technical direction (based on the reference article digested in `notes/01`):
 
