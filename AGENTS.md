@@ -5,7 +5,7 @@
 
 ## 项目概述
 
-**KopiRPC**（Qinwen's Remote Procedure Call）是一个计划用 C++ 实现的高性能 RPC（远程过程调用）框架，许可证为 Apache 2.0。
+**KopiRPC**（Kopi Remote Procedure Call）是一个计划用 C++ 实现的高性能 RPC（远程过程调用）框架，许可证为 Apache 2.0。
 
 **当前阶段：理论学习 / 预实现阶段。** 仓库中**没有任何源代码、构建系统、测试或 CI 配置**。现存内容只有文档：
 
