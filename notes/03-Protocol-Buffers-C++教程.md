@@ -139,7 +139,13 @@
       - 布尔值：false
       - 枚举：第一个定义的枚举值（必须为 0）
     - **不能显式把字段标记为 `singular`**，它只是对非重复字段的描述性说法。
-
+      ```cpp
+        tutorial::Person person;
+        person.set_name("张三");   // name 设置了
+        // id 和 email 根本没碰 —— 完全没问题，不会报错
+        // name 输出: 张三（设过，返回实际值）
+        // id 输出: 0  （没设 → int32 默认值）
+      ```
   - **repeated**（可重复字段）
 
     - 字段可以重复任意次数，包括零次
@@ -161,40 +167,32 @@
 <a id="id5"></a>
 ## ✅ 知识点5: 编译 `.proto` 文件
 
-**有了 `.proto` 文件后，需要使用 `protoc` 编译器生成 C++ 类。**
+**有了 `.proto` 文件后，需要使用 `protoc` 编译器生成 C++ 类**
 
-FSM 风格流程：
+- 流程：
+  - **阶段1: 安装 protoc**
+    - 下一状态：执行编译命令
 
-- **阶段1: 安装 protoc**
-  - 事件：首次使用 Protobuf
-  - 动作：根据官方安装说明安装 Protocol Buffer 编译器
-  - 下一状态：执行编译命令
+  - **阶段2: 执行编译命令**
+    - 事件：运行 `protoc`
+    - 动作：指定源目录、目标目录和 `.proto` 文件路径
+    - 下一状态：生成 C++ 源文件
 
-- **阶段2: 执行编译命令**
-  - 事件：运行 `protoc`
-  - 动作：指定源目录、目标目录和 `.proto` 文件路径
-  - 下一状态：生成 C++ 源文件
+    - **编译命令**
+      ```bash
+      protoc -I=$SRC_DIR --cpp_out=$DST_DIR $SRC_DIR/addressbook.proto
+      ```
+    - 参数说明：
+      - `-I=$SRC_DIR`：指定源目录（`.proto` 文件所在位置），不提供则使用当前目录
+      - `--cpp_out=$DST_DIR`：指定生成 C++ 代码的输出目录
+      - `$SRC_DIR/addressbook.proto`：要编译的 `.proto` 文件路径
 
-### 编译命令
+- 由于需要 C++ 类，所以使用 `--cpp_out`。其他语言有类似选项，如 `--java_out`、`--python_out`。
 
-```bash
-protoc -I=$SRC_DIR --cpp_out=$DST_DIR $SRC_DIR/addressbook.proto
-```
+- **编译后会在目标目录生成两个文件**：
+    - `addressbook.pb.h`：声明生成类的头文件
+    - `addressbook.pb.cc`：生成类的实现文件
 
-参数说明：
-- `-I=$SRC_DIR`：指定源目录（`.proto` 文件所在位置），不提供则使用当前目录。
-- `--cpp_out=$DST_DIR`：指定生成 C++ 代码的输出目录。
-- `$SRC_DIR/addressbook.proto`：要编译的 `.proto` 文件路径。
-
-由于需要 C++ 类，所以使用 `--cpp_out`。其他语言有类似选项，如 `--java_out`、`--python_out`。
-
-### 生成文件
-
-编译后会在目标目录生成两个文件：
-- `addressbook.pb.h`：声明生成类的头文件。
-- `addressbook.pb.cc`：生成类的实现文件。
-
-**注意点**
 > ⚠️ **关键区分**：`-I` 是 include path，不是输出目录；`--cpp_out` 才是输出目录。
 > 💡 **理解技巧**：`.pb.h` 和 `.pb.cc` 就是普通的 C++ 头文件和源文件，编译你的程序时一起编译即可。
 > 📋 **术语提醒**：`protoc` 是 Protocol Buffers 编译器的命令行工具。
