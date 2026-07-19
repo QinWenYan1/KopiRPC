@@ -74,10 +74,7 @@
   docker pull cspenguin/qwenrpc-dev:latest
   docker run -it --rm -v "$(pwd)":/workspace -w /workspace cspenguin/qwenrpc-dev:latest
   ```
-
-> 请将 `cspenguin` 替换为实际的 Docker Hub 用户名。
-
-
+  
 ---
 
 ## 🗺️ Roadmap
