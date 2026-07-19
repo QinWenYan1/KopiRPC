@@ -187,113 +187,109 @@
       - `--cpp_out=$DST_DIR`：指定生成 C++ 代码的输出目录
       - `$SRC_DIR/addressbook.proto`：要编译的 `.proto` 文件路径
 
-- 由于需要 C++ 类，所以使用 `--cpp_out`。其他语言有类似选项，如 `--java_out`、`--python_out`。
-
+- 由于需要 C++ 类，所以使用 `--cpp_out`。其他语言有类似选项，如 `--java_out`、`--python_out`
 - **编译后会在目标目录生成两个文件**：
     - `addressbook.pb.h`：声明生成类的头文件
     - `addressbook.pb.cc`：生成类的实现文件
 
-> ⚠️ **关键区分**：`-I` 是 include path，不是输出目录；`--cpp_out` 才是输出目录。
-> 💡 **理解技巧**：`.pb.h` 和 `.pb.cc` 就是普通的 C++ 头文件和源文件，编译你的程序时一起编译即可。
-> 📋 **术语提醒**：`protoc` 是 Protocol Buffers 编译器的命令行工具。
+> ⚠️ **关键区分**：`-I` 是 include path，不是输出目录；`--cpp_out` 才是输出目录
+> 💡 **理解技巧**：`.pb.h` 和 `.pb.cc` 就是普通的 C++ 头文件和源文件，编译你的程序时一起编译即可
+> 📋 **术语提醒**：`protoc` 是 Protocol Buffers 编译器的命令行工具
 
 ---
 
 <a id="id6"></a>
 ## ✅ 知识点6: 生成类的字段访问器（singular）
 
-**`.proto` 中定义的每个消息对应生成一个 C++ 类，编译器为每个字段生成访问器方法。**
+**`.proto` 中定义的每个消息对应生成一个 C++ 类，编译器为每个字段生成访问器方法**
 
-以 `Person` 中的 `name`、`id`、`email` 三个 singular 字段为例，生成的访问器如下：
+- 以 `Person` 中的 `name`、`id`、`email` 三个 singular 字段为例，生成的访问器如下：
 
-```cpp
-// name
-bool has_name() const;        // Only for explicit presence
-void clear_name();
-const ::std::string& name() const;
-void set_name(const ::std::string& value);
-::std::string* mutable_name();
+  ```cpp
+  // name
+  bool has_name() const;        // Only for explicit presence
+  void clear_name();
+  const ::std::string& name() const;
+  void set_name(const ::std::string& value);
+  ::std::string* mutable_name();
 
-// id
-bool has_id() const;
-void clear_id();
-int32_t id() const;
-void set_id(int32_t value);
+  // id
+  bool has_id() const;
+  void clear_id();
+  int32_t id() const;
+  void set_id(int32_t value);
 
-// email
-bool has_email() const;
-void clear_email();
-const ::std::string& email() const;
-void set_email(const ::std::string& value);
-::std::string* mutable_email();
-```
+  // email
+  bool has_email() const;
+  void clear_email();
+  const ::std::string& email() const;
+  void set_email(const ::std::string& value);
+  ::std::string* mutable_email();
+  ```
 
-**访问器规则：**
+- **访问器规则：**
 
-1. **getter**
-   - 名称与字段的小写名称相同，如 `name()`、`id()`。
-   - 返回字段当前值；未设置时返回默认值。
+  1. **getter**
+      - 名称与字段的小写名称相同，如 `name()`、`id()`
+      - 返回字段当前值；未设置时返回默认值
 
-2. **setter**
-   - 以 `set_` 开头，如 `set_name(...)`、`set_id(...)`。
+  2. **setter**
+      - 以 `set_` 开头，如 `set_name(...)`、`set_id(...)`
 
-3. **`has_` 方法**
-   - 仅对具有**显式存在跟踪**的 singular 字段提供。
-   - 字段已设置时返回 `true`。
+  3. **`has_` 方法**
+      - 仅对具有**显式存在跟踪**的 singular 字段提供
+      - 字段已设置时返回 `true`
 
-4. **`clear_` 方法**
-   - 每个字段都有，将字段重置为默认状态。
+  4. **`clear_` 方法**
+      - 每个字段都有，将字段重置为默认状态
 
-5. **字符串字段的 `mutable_` getter**
-   - 如 `mutable_name()`、`mutable_email()`。
-   - 返回字符串指针，可直接修改其内容。
-   - 即使字段尚未设置，调用 `mutable_email()` 也会自动初始化为空字符串。
+  5. **字符串字段的 `mutable_` getter**
+      - 如 `mutable_name()`、`mutable_email()`
+      - **返回字符串指针，可直接修改其内容**
+      - 即使字段尚未设置，调用 `mutable_email()` 也会自动初始化为空字符串
 
-**注意点**
-> ⚠️ **关键区分**：`has_` 只存在于「显式存在（explicit presence）」字段；隐式存在的 singular 字段没有 `has_`。
-> 💡 **理解技巧**：`mutable_` 就是「给我一个指向内部字符串的指针，我要直接改它」。
-> 📋 **术语提醒**：`显式存在（explicit presence）` 指 Protobuf 会跟踪字段是否被显式设置过。
+> ⚠️ **关键区分**：`has_` 只存在于「显式存在（explicit presence）」字段；隐式存在的 singular 字段没有 `has_`
+> 💡 **理解技巧**：`mutable_` 就是「给我一个指向内部字符串的指针，我要直接改它」
+> 📋 **术语提醒**：`显式存在（explicit presence）` 指 Protobuf 会跟踪字段是否被显式设置过
 
 ---
 
 <a id="id7"></a>
 ## ✅ 知识点7: 生成类的字段访问器（repeated）
 
-**重复字段 `repeated` 的访问器与 singular 字段不同，因为它表示一个动态数组。**
+**重复字段 `repeated` 的访问器与 `singular` 字段不同，因为它表示一个动态数组**
 
-以 `Person::phones` 为例，生成的访问器如下：
+- 以 `Person::phones` 为例，生成的访问器如下：
 
-```cpp
-int phones_size() const;
-void clear_phones();
-const ::google::protobuf::RepeatedPtrField< ::tutorial::Person_PhoneNumber >& phones() const;
-::google::protobuf::RepeatedPtrField< ::tutorial::Person_PhoneNumber >* mutable_phones();
-const ::tutorial::Person_PhoneNumber& phones(int index) const;
-::tutorial::Person_PhoneNumber* mutable_phones(int index);
-::tutorial::Person_PhoneNumber* add_phones();
-```
+  ```cpp
+  int phones_size() const;
+  void clear_phones();
+  const ::google::protobuf::RepeatedPtrField< ::tutorial::Person_PhoneNumber >& phones() const;
+  ::google::protobuf::RepeatedPtrField< ::tutorial::Person_PhoneNumber >* mutable_phones();
+  const ::tutorial::Person_PhoneNumber& phones(int index) const;
+  ::tutorial::Person_PhoneNumber* mutable_phones(int index);
+  ::tutorial::Person_PhoneNumber* add_phones();
+  ```
 
-**repeated 字段访问器规则：**
+- **repeated 字段访问器规则：**
+  1. **`_size()`**：返回重复字段的长度，即元素数量
+  2. **`clear_()`**：清空整个列表
+  3. **`phones()`**：返回整个重复字段的只读引用
+  4. **`mutable_phones()`**：返回整个列表的可修改指针
+  5. **按索引访问**：
+      - `phones(int index)`：只读访问第 `index` 个元素。
+      - `mutable_phones(int index)`：可修改访问第 `index` 个元素
+  6. **`add_()`**：
+      - 添加一个新元素并返回其指针
+      - 返回后可继续编辑该新元素
+      - 重复标量类型也有 `add_` 方法，可直接传入新值
 
-1. **`_size()`**：返回重复字段的长度，即元素数量。
-2. **`clear_()`**：清空整个列表。
-3. **`phones()`**：返回整个重复字段的只读引用。
-4. **`mutable_phones()`**：返回整个列表的可修改指针。
-5. **按索引访问**：
-   - `phones(int index)`：只读访问第 `index` 个元素。
-   - `mutable_phones(int index)`：可修改访问第 `index` 个元素。
-6. **`add_()`**：
-   - 添加一个新元素并返回其指针。
-   - 返回后可继续编辑该新元素。
-   - 重复标量类型也有 `add_` 方法，可直接传入新值。
+- **关键区别：**
+  - `repeated` 字段**没有 `set_` 方法**，因为不能一次性替换整个列表（需要用 `clear` + `add` 或 `mutable_`）
 
-**关键区别：**
-- repeated 字段**没有 `set_` 方法**，因为不能一次性替换整个列表（需要用 `clear` + `add` 或 `mutable_`）。
-
-**注意点**
-> ⚠️ **关键区分**：repeated 字段用 `add_` 新增元素，用索引访问已有元素，不能用 `set_phones(...)`。
-> 💡 **理解技巧**：把 `repeated PhoneNumber phones` 想象成 `std::vector<PhoneNumber>`，`add_phones()` 就像 `push_back()`。
-> 📋 **术语提醒**：`RepeatedPtrField` 是 Protobuf C++ 运行时提供的重复消息字段容器类。
+> ⚠️ **关键区分**：repeated 字段用 `add_` 新增元素，用索引访问已有元素，不能用 `set_phones(...)`
+> 💡 **理解技巧**：把 `repeated PhoneNumber phones` 想象成 `std::vector<PhoneNumber>`，`add_phones()` 就像 `push_back()`
+> 📋 **术语提醒**：`RepeatedPtrField` 是 Protobuf C++ 运行时提供的重复消息字段容器类
 
 ---
 
