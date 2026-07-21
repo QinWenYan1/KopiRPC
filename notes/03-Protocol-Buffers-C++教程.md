@@ -452,49 +452,6 @@
   #include "addressbook.pb.h"
   using namespace std;
 
-  // 根据用户输入填充 Person 消息
-  void PromptForAddress(tutorial::Person& person) {
-    cout << "Enter person ID number: ";
-    int id;
-    cin >> id;
-    person.set_id(id);
-    cin.ignore(256, '\n');
-
-    cout << "Enter name: ";
-    getline(cin, *person.mutable_name());
-
-    cout << "Enter email address (blank for none): ";
-    string email;
-    getline(cin, email);
-    if (!email.empty()) {
-      person.set_email(email);
-    }
-
-    while (true) {
-      cout << "Enter a phone number (or leave blank to finish): ";
-      string number;
-      getline(cin, number);
-      if (number.empty()) {
-        break;
-      }
-
-      tutorial::Person::PhoneNumber* phone_number = person.add_phones();
-      phone_number->set_number(number);
-
-      cout << "Is this a mobile, home, or work phone? ";
-      string type;
-      getline(cin, type);
-      if (type == "mobile") {
-        phone_number->set_type(tutorial::Person::PHONE_TYPE_MOBILE);
-      } else if (type == "home") {
-        phone_number->set_type(tutorial::Person::PHONE_TYPE_HOME);
-      } else if (type == "work") {
-        phone_number->set_type(tutorial::Person::PHONE_TYPE_WORK);
-      } else {
-        cout << "Unknown phone type. Using default." << endl;
-      }
-    }
-  }
 
   int main(int argc, char* argv[]) {
     // 验证链接的库版本与编译头文件版本兼容
@@ -519,7 +476,8 @@
     }
 
     // 添加一个地址
-    PromptForAddress(*address_book.add_people());
+    // 根据用户输入填充 Person 消息
+    PromptForAddress(*address_book.add_people()); 
 
     {
       // 将新地址簿写回磁盘
@@ -587,36 +545,6 @@
   #include "addressbook.pb.h"
   using namespace std;
 
-  // 遍历 AddressBook 中所有人并打印信息
-  void ListPeople(const tutorial::AddressBook& address_book) {
-    for (const tutorial::Person& person : address_book.people()) {
-      cout << "Person ID: " << person.id() << endl;
-      cout << "  Name: " << person.name() << endl;
-      if (!person.has_email()) {
-        cout << "  E-mail address: " << person.email() << endl;
-      }
-
-      for (const tutorial::Person::PhoneNumber& phone_number : person.phones()) {
-        switch (phone_number.type()) {
-          case tutorial::Person::PHONE_TYPE_MOBILE:
-            cout << "  Mobile phone #: ";
-            break;
-          case tutorial::Person::PHONE_TYPE_HOME:
-            cout << "  Home phone #: ";
-            break;
-          case tutorial::Person::PHONE_TYPE_WORK:
-            cout << "  Work phone #: ";
-            break;
-          case tutorial::Person::PHONE_TYPE_UNSPECIFIED:
-          default:
-            cout << "  Phone #: ";
-            break;
-        }
-        cout << phone_number.number() << endl;
-      }
-    }
-  }
-
   int main(int argc, char* argv[]) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
@@ -636,16 +564,14 @@
       }
     }
 
-    ListPeople(address_book);
+    ListPeople(address_book); // 遍历 AddressBook 中所有人并打印信息
 
     google::protobuf::ShutdownProtobufLibrary();
 
     return 0;
   }
   ```
-
-
-> ⚠️ **关键区分**：读取时用 `ParseFromIstream`；写入时用 `SerializeToOstream`
+- 读取时用 `ParseFromIstream`；写入时用 `SerializeToOstream`
 > 💡 **理解技巧**：遍历 repeated 字段就像遍历 `std::vector`，用范围 for 循环即可
 > 📋 **术语提醒**：`has_email()` 检查的是显式存在；如果 `email` 是隐式存在字段，则没有 `has_email()`
 
