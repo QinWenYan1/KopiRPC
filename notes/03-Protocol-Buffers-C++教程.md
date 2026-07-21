@@ -239,6 +239,7 @@
   3. **`has_` 方法**
       - 仅对具有**显式存在跟踪**的 singular 字段提供
       - 字段已设置时返回 `true`
+> ⚠️ **关键区分**：`has_` 只存在于「显式存在（explicit presence）」字段；隐式存在的 singular 字段没有 `has_`
 
   4. **`clear_` 方法**
       - 每个字段都有，将字段重置为默认状态
@@ -248,7 +249,6 @@
       - **返回字符串指针，可直接修改其内容**
       - 即使字段尚未设置，调用 `mutable_email()` 也会自动初始化为空字符串
 
-> ⚠️ **关键区分**：`has_` 只存在于「显式存在（explicit presence）」字段；隐式存在的 singular 字段没有 `has_`
 > 💡 **理解技巧**：`mutable_` 就是「给我一个指向内部字符串的指针，我要直接改它」
 > 📋 **术语提醒**：`显式存在（explicit presence）` 指 Protobuf 会跟踪字段是否被显式设置过
 
@@ -283,11 +283,11 @@
       - 添加一个新元素并返回其指针
       - 返回后可继续编辑该新元素
       - 重复标量类型也有 `add_` 方法，可直接传入新值
+> ⚠️ **关键区分**：repeated 字段用 `add_` 新增元素，用索引访问已有元素，不能用 `set_phones(...)`
 
 - **关键区别：**
   - `repeated` 字段**没有 `set_` 方法**，因为不能一次性替换整个列表（需要用 `clear` + `add` 或 `mutable_`）
 
-> ⚠️ **关键区分**：repeated 字段用 `add_` 新增元素，用索引访问已有元素，不能用 `set_phones(...)`
 > 💡 **理解技巧**：把 `repeated PhoneNumber phones` 想象成 `std::vector<PhoneNumber>`，`add_phones()` 就像 `push_back()`
 > 📋 **术语提醒**：`RepeatedPtrField` 是 Protobuf C++ 运行时提供的重复消息字段容器类
 
