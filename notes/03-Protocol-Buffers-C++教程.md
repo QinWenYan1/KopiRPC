@@ -20,6 +20,7 @@
 - [*知识点12: 读取消息的完整流程*](#id12)
 - [*知识点13: 扩展 Protocol Buffer 的兼容规则*](#id13)
 - [*知识点14: 优化技巧与高级用法*](#id14)
+- [*知识点15: 定义服务接口（service 与 rpc）*](#id15)
 
 ---
 
@@ -116,6 +117,9 @@
       - 每个字段后的 `= 1`、`= 2` 等是字段在二进制编码中的唯一编号
       - **字段编号 1–15 比更高编号少占用一个字节**，适合作为常用或重复元素的优化
       - 16 及以上用于不常用元素
+  6. **类型继承**
+    - 所有的消息类型都继承自`Message`类
+      ![alt text](images/3.png)
 
 > ⚠️ **关键区分**：字段编号不是赋值，而是二进制格式中的「字段身份证」
 > 💡 **理解技巧**：把 1–15 号字段想象成「短途火车票」，更便宜（省字节）；16 以上是「长途票」，稍贵
@@ -663,6 +667,77 @@
 
 ---
 
+<a id="id15"></a>
+## ✅ 知识点15: 定义服务接口（service 与 rpc）
+
+**Protobuf 还能定义服务接口（service）——这是 RPC 的入口**
+
+- **语法**：`service` 把一组 `rpc` 方法定义成一份「接口合同」：
+
+  ```proto
+  syntax = "proto3";
+  package fixbug;
+
+  option cc_generic_services = true;   // 关键开关：让 protoc 生成服务代码
+
+  message ResultCode {                // 响应中嵌套的错误码
+    int32 errcode = 1;
+    bytes errmsg  = 2;
+  }
+  message LoginRequest {
+    bytes name = 1;
+    bytes pwd  = 2;
+  }
+  message LoginResponse {
+    ResultCode result = 1;
+    bool success      = 2;
+  }
+  message RegisterRequest {
+    int32 id   = 1;
+    bytes name = 2;
+    bytes pwd  = 3;
+  }
+  message RegisterResponse {
+    ResultCode result = 1;
+    bool success      = 2;
+  }
+
+  // 在 proto 中注册服务及其方法
+  service UserServiceRpc {
+    rpc Login (LoginRequest) returns (LoginResponse);
+    rpc Register (RegisterRequest) returns (RegisterResponse);
+  }
+  ```
+
+- **语法规则：**
+  1. `rpc 方法名 (请求消息) returns (响应消息);`
+  2. **请求和响应必须都是 message**，不能是 `int32` 等标量——所以每个 rpc 方法都要配套定义一对消息
+  3. 一个 `service` 可包含任意多个 `rpc` 方法
+
+- **关键开关 `option cc_generic_services = true;`**：
+  - protobuf 3.x 的 C++ 生成器**默认不生成服务代码**，必须显式打开（本项目镜像是 3.12.4，需要它）
+  - 更新的 protobuf（v22+，含 Editions）已移除该选项，官方推荐改用 gRPC 插件生成服务代码
+
+- **编译生成两个类——同一服务的两面：**
+
+  | 生成的类 | 给谁用 | 干什么 |
+  |---|---|---|
+  | `UserServiceRpc`（Service 基类） | 服务端 Callee | **继承它并重写虚方法**，填真正的业务逻辑 |
+  | `UserServiceRpc_Stub`（桩类） | 客户端 Caller | 构造时传入 `RpcChannel`，**像调本地函数一样发远程调用** |
+
+  - 虚方法四参数签名：`void Login(RpcController*, const LoginRequest*, LoginResponse*, Closure* done);`
+  - **protobuf 库本身不含网络实现**：`RpcChannel` / `RpcController` 是抽象接口，需要框架自己实现
+- 类型的继承：
+  - **所有服务类都继承自 `service` 基类**
+  ![alt text](images/4.png)
+
+> ⚠️ **关键区分**：`message` 定义「数据长什么样」，`service` 定义「能调什么方法」——proto 文件的两种顶级定义。
+> ⚠️ **坑提醒**：忘了 `option cc_generic_services = true;`，生成的代码里就没有 Service/Stub 类。
+> 💡 **理解技巧**：`service` 就是一组 rpc 方法的「合同」；Stub 在调用端"假装是函数"，Service 在提供端"真正干活"。
+
+
+---
+
 ## 🔑 核心要点总结
 
 1. **Protobuf C++ 开发三步走**：写 `.proto` → `protoc --cpp_out` 生成 `.pb.h`/`.pb.cc` → 在 C++ 代码中构建/序列化/反序列化。
@@ -673,5 +748,6 @@
 6. **序列化 API**：`SerializeToString`、`SerializeToOstream`、`ParseFromString`、`ParseFromIstream`。
 7. **兼容规则**：字段编号不可改、可删字段、新增字段必须用全新编号。
 8. **性能优化**：Arena 批量分配、对象重用、TCMalloc、二进制负载用 `bytes`；高级用法包括反射。
+9. **服务定义**：`service` + `rpc` 定义接口；`option cc_generic_services = true;` 生成 Service 基类（服务端继承重写）与 Stub（客户端调用）；`RpcChannel` 需框架自己实现。
 
 ---
