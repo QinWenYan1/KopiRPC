@@ -778,7 +778,7 @@
 - **漏斗设计**：Stub 的**每个** rpc 方法体都汇成同一行 `channel_->CallMethod(...)`——所有调用流经同一个漏斗，网络逻辑**只需写一次**，而不是每个 rpc 方法写一遍。
 
 - **调用链全貌**：
-
+   ![alt text](images/5.png)
   ```text
   stub.Login(...)                      // 业务方调用，像本地函数
     └→ channel_->CallMethod(...)       // Stub 只负责转发（protoc 生成）
