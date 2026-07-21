@@ -733,9 +733,9 @@
     - `Login`：proto 里每行 rpc 生成一个虚函数——服务端继承后重写它，填业务逻辑。
     - `GetDescriptor()`：返回服务的元数据（服务名/方法名）——框架靠它在运行时不认识你的类也能注册和分发调用。
     - **就这两个角色：虚函数填业务，`GetDescriptor` 给框架当地图**
-  - `UserServiceRpc_Stub` 就是客户端那一半——同一个 `service` 生成的两个类，服务端用基类，客户端用 Stub：
+  - **`UserServiceRpc_Stub` 就是客户端那一半——同一个 `service` 生成的两个类，服务端用基类，客户端用 Stub**：
     - 它也继承 `UserServiceRpc`：所以方法签名和服务端一模一样，`stub.Login(...)` 调起来就是个普通本地函数
-    - 构造时传入一个 `RpcChannel`：`UserServiceRpc_Stub stub(new MprpcChannel());`
+    - 构造 `stub` 类时传入一个 `RpcChannel`：`UserServiceRpc_Stub stub(new MprpcChannel());`
     - 方法体只有一行——转发：生成的代码长这样，自己一点业务不干：
       ```cpp
         void UserServiceRpc_Stub::Login(controller, request, response, done) {
