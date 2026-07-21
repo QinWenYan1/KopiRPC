@@ -21,6 +21,7 @@
 - [*知识点13: 扩展 Protocol Buffer 的兼容规则*](#id13)
 - [*知识点14: 优化技巧与高级用法*](#id14)
 - [*知识点15: 定义服务接口（service 与 rpc）*](#id15)
+- [*知识点16: RpcChannel——框架要实现的网络插头*](#id16)
 
 ---
 
@@ -734,21 +735,70 @@
     - `GetDescriptor()`：返回服务的元数据（服务名/方法名）——框架靠它在运行时不认识你的类也能注册和分发调用。
     - **就这两个角色：虚函数填业务，`GetDescriptor` 给框架当地图**
   - **`UserServiceRpc_Stub` 就是客户端那一半——同一个 `service` 生成的两个类，服务端用基类，客户端用 Stub**：
-    - 它也继承 `UserServiceRpc`：所以方法签名和服务端一模一样，`stub.Login(...)` 调起来就是个普通本地函数
-    - 构造 `stub` 类时传入一个 `RpcChannel`：`UserServiceRpc_Stub stub(new MprpcChannel());`
-    - 方法体只有一行——转发：生成的代码长这样，自己一点业务不干：
+    - 它也继承 `UserServiceRpc`：
+      - 所以方法签名和服务端一模一样，`stub.Login(...)` 调起来就是个普通本地函数
+    - **构造 `stub` 类时传入一个 `RpcChannel`**：
+      - `UserServiceRpc_Stub(RpcChannel* channel);`
+    - **函数体只有一行——通过 `channel` 转发调用**：
       ```cpp
         void UserServiceRpc_Stub::Login(controller, request, response, done) {
         channel->CallMethod(descriptor()->method(0),  // 告诉 channel：调的是第 0 个方法
                             controller, request, response, done);
       }
       ```
-    - 顺带看点妙的：`descriptor()->method(0)` 就是 `GetDescriptor()` 那份元数据——`Stub` 靠它告诉 `channel`"我调的是哪个方法"
+    - 顺带看点妙的：
+      - `descriptor()->method(0)` 就是 `GetDescriptor()` 那份元数据
+      - `Stub` 靠它告诉 `channel`"我调的是哪个方法"
 
 > ⚠️ **关键区分**：`message` 定义「数据长什么样」，`service` 定义「能调什么方法」——proto 文件的两种顶级定义。
 > ⚠️ **坑提醒**：忘了 `option cc_generic_services = true;`，生成的代码里就没有 Service/Stub 类。
 > 💡 **理解技巧**：`service` 就是一组 rpc 方法的「合同」；Stub 在调用端"假装是函数"，Service 在提供端"真正干活"。
 
+---
+
+<a id="id16"></a>
+## ✅ 知识点16: `RpcChannel` ——框架要实现的网络插头
+
+**`UserServiceRpc_Stub` 的每个方法都只是转发给 `RpcChannel`**
+
+- **而 `RpcChannel` 是 protobuf 只定义、不实现的抽象接口——网络传输由框架自己写**
+
+- **是什么**：`google::protobuf::RpcChannel` 抽象接口，代表「客户端通往服务端的通信通道」。核心方法只有一个：
+
+  ```cpp
+  virtual void CallMethod(const MethodDescriptor* method,
+                          RpcController* controller,
+                          const Message* request,   // 序列化前的请求
+                          Message* response,        // 待填充的响应
+                          Closure* done) = 0;
+  ```
+
+- **为什么只有接口没有实现**：protobuf 不知道你想用什么网络库（TCP？HTTP？muduo？）——它只规定「插口形状」，电流（网络传输）由框架自己接。
+
+- **漏斗设计**：Stub 的**每个** rpc 方法体都汇成同一行 `channel_->CallMethod(...)`——所有调用流经同一个漏斗，网络逻辑**只需写一次**，而不是每个 rpc 方法写一遍。
+
+- **调用链全貌**：
+
+  ```text
+  stub.Login(...)                      // 业务方调用，像本地函数
+    └→ channel_->CallMethod(...)       // Stub 只负责转发（protoc 生成）
+         └→ RpcChannel::CallMethod   // 框架手写：真正的网络收发
+  ```
+
+- **框架实现 `CallMethod` 的六步**（完整细节见 [notes/01](01-RPC框架实现-ZooKeeper-ProtoBuf-Muduo.md) 知识点12）：
+  1. 从 `method` 描述符取出服务名 + 方法名
+  2. 序列化 `request`
+  3. 拼 RPC 头部（服务名、方法名、参数长度）
+  4. 查 ZooKeeper 拿到服务端 IP:Port
+  5. 建 TCP 连接并发送
+  6. 接收响应 → 反序列化进 `response` → `done->Run()`
+
+- **姊妹接口 `RpcController`**：单次调用的「控制面板」——报错 `SetFailed`、取消等，框架同样可自行实现。
+
+> ⚠️ **关键区分**：`Stub` 是 protoc **生成**的（只负责转发），`RpcChannel` 是框架**手写**的（负责网络）——客户端代码一半白拿、一半自己造。
+> 💡 **理解技巧**：`RpcChannel` 就像电源插座的标准——protobuf 只规定插口形状，框架（`MprpcChannel`）才是插上去的电器。
+> 🔄 **知识关联**：`MprpcChannel` 的完整实现见 [notes/01](01-RPC框架实现-ZooKeeper-ProtoBuf-Muduo.md) 知识点12；服务端对称的分发入口 `Service::CallMethod` 见 notes/01 知识点11。
+> 📋 **术语提醒**：`通道（channel）` 在 RPC 语境中泛指「一次调用从客户端到服务端的传输通路」。
 
 ---
 
@@ -763,5 +813,6 @@
 7. **兼容规则**：字段编号不可改、可删字段、新增字段必须用全新编号。
 8. **性能优化**：Arena 批量分配、对象重用、TCMalloc、二进制负载用 `bytes`；高级用法包括反射。
 9. **服务定义**：`service` + `rpc` 定义接口；`option cc_generic_services = true;` 生成 Service 基类（服务端继承重写）与 Stub（客户端调用）；`RpcChannel` 需框架自己实现。
+10. **RpcChannel**：Stub 的所有方法都转发到 `channel_->CallMethod`；该接口 protobuf 只定义不实现，网络收发由框架（`MprpcChannel`）手写一次、全部 rpc 复用。
 
 ---
