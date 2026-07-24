@@ -1,8 +1,14 @@
 # macOS system files
 .DS_Store
 
-# 构建产物
+# 构建产物(cmake)
 build/
 bin/
 lib/
+
+# clangd 索引缓存
+.cache/
+
+# 保险带:正常只活在 build/ 里,根目录出现即误操作
+compile_commands.json
 
