@@ -12,12 +12,14 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 #设置编译头文件的搜索路径 -I
-include_directories(${PROJECT_SOURCE_DIR}/src)
+include_directories(${PROJECT_SOURCE_DIR}/src/include)
 include_directories(${PROJECT_SOURCE_DIR}/example)
 
 #设置项目库文件的搜索路径 -L
 link_directories(${PROJECT_SOURCE_DIR}/lib)
 
 #进入子目录进行编译
-#add_subdirectory(src)
+#服务框架的编译路径
+add_subdirectory(src)
+#使用服务框架的业务路径
 add_subdirectory(example)
