@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "user.pb.h"
+#include "KopirpcApplication.h"
 
 
 /* 提供一个本地的简单服务*/

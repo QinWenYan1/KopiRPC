@@ -7,7 +7,7 @@
 
 **KopiRPC**（Kopi Remote Procedure Call）是一个计划用 C++ 实现的高性能 RPC（远程过程调用）框架，许可证为 Apache 2.0。
 
-**当前阶段：理论学习 / 预实现阶段。** 仓库中**没有任何源代码、构建系统、测试或 CI 配置**。现存内容只有文档：
+**当前阶段：编码早期（跟随教程搭建中）。** 教程式 CMake 构建系统与 Dev Containers 开发环境已就位，框架代码（`src/`）刚开始写。目录现状：
 
 ```
 KopiRPC/
@@ -15,11 +15,17 @@ KopiRPC/
 ├── CLAUDE.md          # 给 Claude Code 的英文指南（仓库约定、当前状态）
 ├── AGENTS.md          # 本文件
 ├── LICENSE            # Apache License 2.0
-└── docs/              # 学习笔记与开发文档（项目目前的实质内容）
+├── CMakeLists.txt     # 根 CMake（教程风格）：产物出口 bin/ lib/、include 路径、add_subdirectory(src + example)
+├── .clang-format      # 代码风格配置（Google 预设）
+├── .devcontainer/     # Dev Containers 配置：镜像 + 容器内 clangd/CMake Tools
+├── docker/            # Dockerfile.dev（开发镜像定义）
+├── src/               # 框架代码（刚开始：include/、proto/）
+├── example/           # 示例业务代码（user.proto、callee/、caller/；.pb 文件由容器内 protoc 生成）
+└── docs/              # 学习笔记与开发文档
     ├── 01-RPC框架实现-ZooKeeper-ProtoBuf-Muduo.md   # 第 01 篇笔记（中文）
     ├── 02-Protocol-Buffers-概览.md                  # 第 02 篇笔记
     ├── 03-Protocol-Buffers-C++教程.md               # 第 03 篇笔记
-    ├── docker-dev-setup.md                          # Docker 开发环境搭建文档
+    ├── docker-dev-setup.md                          # Docker / Dev Containers 开发环境文档
     └── images/        # 笔记引用的图片
 ```
 
@@ -27,12 +33,15 @@ KopiRPC/
 
 ## 构建与测试
 
-**目前没有任何构建、测试、Lint 命令——不要编造或假设它们存在。** 仓库中没有 `CMakeLists.txt`、`Makefile`、`package.json` 等任何配置文件，也没有 `.gitignore`。
+**一切构建只在开发容器内进行**（protobuf 3.12.4 / muduo / zookeeper 只存在于镜像中；mac 本机环境不同，混用必炸）。
 
-当代码落地后（预计为 CMake + C++），请同步更新本文件与 `CLAUDE.md`，补充：
+- 进入环境：VS Code + Dev Containers 扩展 → Reopen in Container（详见 `docs/docker-dev-setup.md` 方式 B）
+- 配置：`cmake -S . -B build`（同时生成 `build/compile_commands.json` 供 clangd；**不要用 `cmake .` 原地构建**）
+- 构建：`cmake --build build -j`；产物在 `bin/`（可执行）与 `lib/`
+- `.proto` 变更后重新生成：`cd example && protoc --cpp_out=. user.proto`（生成物版本必须与容器内库一致）
+- 构建产物（`build/` `bin/` `lib/` `.cache/`）已 gitignore，不进 git；`.pb.cc/.pb.h` 当前随教程提交
 
-- 构建、测试、Lint 命令（包括如何运行单个测试）
-- 框架的实际架构（传输层、序列化、服务注册/发现、日志）
+暂无测试与 Lint 命令（框架跑通后引入 clang-tidy 时再补）。框架的实际架构（传输层、序列化、服务注册/发现、日志）随实现落地后更新于此。
 
 ## 规划中的技术栈与架构
 
@@ -71,6 +80,7 @@ KopiRPC/
    - 图片存放在 `docs/images/`
 3. **工作流**：在生成或重构内容之前，先给出要点大纲（要点）供用户审阅，**获得批准后再执行**。
 4. **保留手工修改**：用户经常在生成后手动编辑文件——再次修改这些文件时，务必保留用户的手工改动。
+5. **CMake 是教程风格，不要擅自重构**：`include_directories`、全局输出路径等写法是用户跟随教程手写的学习路线；除非用户要求，不要改写为现代 target 风格。构建产物（`build/` `bin/` `lib/` `.cache/`）不进 git；原地构建残骸（`CMakeFiles/` 等）故意不 ignore，留在 git status 里当报警器。
 
 ## 语言约定
 
@@ -79,7 +89,7 @@ KopiRPC/
 
 ## 给 AI 代理的注意事项
 
-- 这是一个**纯文档仓库**：不要寻找或假设源代码、构建脚本、测试的存在；涉及代码的任务应先与用户确认设计（先出要点大纲）。
+- 仓库处于**编码早期**：构建命令见上文「构建与测试」（一切构建只在容器内进行）；涉及代码结构/架构的任务应先与用户确认设计（先出要点大纲）。
 - 修改笔记时遵循上述格式约定（锚点、状态机式流程、双语术语、来源标注），并保持与参考文章的事实一致——笔记中标注"依据原文整理"的代码不是逐字原文。
 - 编辑 README 前先重读"仓库约定"第 1 条，避免把实现细节写进去。
 - 当项目引入代码、构建系统或测试后，及时更新本文件和 `CLAUDE.md` 中"当前阶段"与"构建与测试"的描述。

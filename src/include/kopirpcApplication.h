@@ -6,6 +6,11 @@ class KopirpcApplication
 {
 public: 
     static void Init(int argc, char **argv);
+    static KopirpcApplication& GetInstance()
+    {
+        static KopirpcApplication app; 
+        return app; 
+    }
 private:
     KopirpcApplication();
     /*拷贝构造函数全部删除*/

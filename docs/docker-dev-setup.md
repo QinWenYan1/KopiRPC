@@ -201,6 +201,20 @@ docker push cspenguin/qwenrpc-dev:latest
 
 **A**：当前镜像是 `linux/arm64` 架构。如果需要在 x86_64 上运行，需要在 x86_64 机器上重新构建，或使用 `docker buildx` 构建 multi-arch 镜像。
 
+### Q5：容器内执行 `sudo` 提示 `sudo: command not found`？
+
+**A**：正常现象。开发容器内你就是 **root**（提示符为 `root@...`），镜像未安装、也不需要 `sudo`——直接去掉 `sudo` 执行命令即可。
+
+### Q6：VS Code 弹窗 "clangd language server is not installed"，且只有 Open website 按钮？
+
+**A**：clangd 官方的自动下载没有 **linux/arm64** 版本（本镜像架构），扩展只能引导你去官网。直接在容器内用 apt 安装：
+
+```bash
+apt-get update && apt-get install -y clangd
+```
+
+装完在命令面板执行 `clangd: Restart language server`——扩展只在启动时查找一次服务端，apt 装完不会自动察觉，必须重启。
+
 ---
 
 
