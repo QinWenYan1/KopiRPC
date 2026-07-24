@@ -52,6 +52,7 @@ int main(int argc, char** argv)
 
     //可以在框架上发布服务的角色：provider是一个网络服务对象
     //把UserService对象发到rpc节点上
+    //所以很多客户端都会请求provider, provider必须通过muduo保重高并发
     // RpcProvider provider; 
     // provider.NotifyService(new UserService());
 
