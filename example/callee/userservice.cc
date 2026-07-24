@@ -4,7 +4,8 @@
 
 
 /* 提供一个本地的简单服务*/
-class UserService : public fixbug::UserServiceRpc{ //使用rpc服务发布端（rpc服务提供者）
+class UserService : public fixbug::UserServiceRpc //使用rpc服务发布端（rpc服务提供者）
+{ 
     bool Login(std::string name, std::string pwd)
     {
         std::cout << "Doing the local service: login..."<< std::endl; 
@@ -42,7 +43,21 @@ class UserService : public fixbug::UserServiceRpc{ //使用rpc服务发布端（
     
 }; 
 
-int main()
-{
+
+int main(int argc, char** argv)
+{   
+    //调用框架的初始化操作
+    //KopirpcApplication::Init(argc, argv); 
+
+    //可以在框架上发布服务的角色：provider是一个网络服务对象
+    //把UserService对象发到rpc节点上
+    // RpcProvider provider; 
+    // provider.NotifyService(new UserService());
+
+    //启动一个rpc服务发布节点
+    //Run以后，进程进入阻塞状态，等待远程rpc调用请求
+    //这里相当于UserService的void login()
+    //provider.Run(); 
+
     return 0; 
 }
