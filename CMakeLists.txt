@@ -18,8 +18,11 @@ include_directories(${PROJECT_SOURCE_DIR}/example)
 #设置项目库文件的搜索路径 -L
 link_directories(${PROJECT_SOURCE_DIR}/lib)
 
-#进入子目录进行编译
-#服务框架的编译路径
+#-----------------------进入子目录进行编译------------------------
+
+#服务框架的编译路径，src未来向对外提供为so库
+#src包含了Kopirpc框架所有的相关代码
 add_subdirectory(src)
 #使用服务框架的业务路径
+#example包含了Kopirpc框架使用的示例代码
 add_subdirectory(example)
