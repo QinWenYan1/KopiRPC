@@ -2,10 +2,15 @@
 #include <unistd.h>
 #include <iostream>
 #include <string>
+#include "kopirpcconfig.h"
+
+
 
 inline void ShowArgsHelp() {
   std::cout << "format: command -i <configfile>" << std::endl;
 }
+
+KopirpcConfig KopirpcApplication::config; //类外初始化静态成员
 
 void KopirpcApplication::Init(int argc, char** argv) {
   if (argc < 2)  // user没有输入参数，不允许，报错
@@ -21,8 +26,8 @@ void KopirpcApplication::Init(int argc, char** argv) {
       case 'i':
         config_file = optarg;
         break;
-      case '?': //
-        ShowArgsHelp(); 
+      case '?':
+        ShowArgsHelp();
         exit(EXIT_FAILURE);
       case ':':
         ShowArgsHelp();
@@ -32,13 +37,11 @@ void KopirpcApplication::Init(int argc, char** argv) {
 
   /*
    * 开始加载配置文件了
-   */
-
-  /*
    * 配置文件内容：
    * rpcserver_ip, rpcserver_port
    * zookeeper_ip, zookeeper_port
    */
+  config.LoadConfigFile(config_file.c_str());
 }
 
 KopirpcApplication& KopirpcApplication::GetInstance() {
