@@ -7,13 +7,10 @@ class KopirpcApplication
 {
 public: 
     static void Init(int argc, char **argv);
-    static KopirpcApplication& GetInstance()
-    {
-        static KopirpcApplication app; 
-        return app; 
-    }
+    static KopirpcApplication& GetInstance();
+    
 private:
-    KopirpcApplication();
+    KopirpcApplication() = default;
     /*拷贝构造函数全部删除*/
     KopirpcApplication(const KopirpcApplication&) = delete;
     KopirpcApplication(const KopirpcApplication&&) = delete;
