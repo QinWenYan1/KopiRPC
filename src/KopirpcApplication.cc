@@ -21,12 +21,10 @@ void KopirpcApplication::Init(int argc, char** argv) {
       case 'i':
         config_file = optarg;
         break;
-      case '?':
-        std::cout << "invalid option args!" << std::endl;
-        ShowArgsHelp();
+      case '?': //
+        ShowArgsHelp(); 
         exit(EXIT_FAILURE);
       case ':':
-        std::cout << "need config file!" << std::endl;
         ShowArgsHelp();
         exit(EXIT_FAILURE);
     }
