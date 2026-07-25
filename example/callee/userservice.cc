@@ -48,7 +48,10 @@ class UserService : public fixbug::UserServiceRpc //使用rpc服务发布端（r
 
 int main(int argc, char** argv)
 {   
-    //调用框架的初始化操作
+    /* 
+    * 调用框架的初始化操作
+    * 命令行传入的信息类似于 provider -i config.conf 来读入网络服务器的IP地址和端口好等
+    */
     KopirpcApplication::Init(argc, argv); 
 
     /*
