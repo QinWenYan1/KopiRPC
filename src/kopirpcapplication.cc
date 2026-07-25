@@ -6,7 +6,7 @@
 
 
 
-inline void ShowArgsHelp() {
+static void ShowArgsHelp() {
   std::cout << "format: command -i <configfile>" << std::endl;
 }
 
