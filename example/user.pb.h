@@ -189,7 +189,7 @@ class ResultCode PROTOBUF_FINAL :
 
   enum : int {
     kErrmsgFieldNumber = 2,
-    kErrorcodeFieldNumber = 1,
+    kErrcodeFieldNumber = 1,
   };
   // bytes errmsg = 2;
   void clear_errmsg();
@@ -216,13 +216,13 @@ class ResultCode PROTOBUF_FINAL :
   std::string* _internal_mutable_errmsg();
   public:
 
-  // int32 errorcode = 1;
-  void clear_errorcode();
-  ::PROTOBUF_NAMESPACE_ID::int32 errorcode() const;
-  void set_errorcode(::PROTOBUF_NAMESPACE_ID::int32 value);
+  // int32 errcode = 1;
+  void clear_errcode();
+  ::PROTOBUF_NAMESPACE_ID::int32 errcode() const;
+  void set_errcode(::PROTOBUF_NAMESPACE_ID::int32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_errorcode() const;
-  void _internal_set_errorcode(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_errcode() const;
+  void _internal_set_errcode(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
   // @@protoc_insertion_point(class_scope:fixbug.ResultCode)
@@ -233,7 +233,7 @@ class ResultCode PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr errmsg_;
-  ::PROTOBUF_NAMESPACE_ID::int32 errorcode_;
+  ::PROTOBUF_NAMESPACE_ID::int32 errcode_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_user_2eproto;
 };
@@ -533,7 +533,7 @@ class LoginResponse PROTOBUF_FINAL :
 
   enum : int {
     kResultFieldNumber = 1,
-    kSucessFieldNumber = 2,
+    kSuccessFieldNumber = 2,
   };
   // .fixbug.ResultCode result = 1;
   bool has_result() const;
@@ -553,13 +553,13 @@ class LoginResponse PROTOBUF_FINAL :
       ::fixbug::ResultCode* result);
   ::fixbug::ResultCode* unsafe_arena_release_result();
 
-  // bool sucess = 2;
-  void clear_sucess();
-  bool sucess() const;
-  void set_sucess(bool value);
+  // bool success = 2;
+  void clear_success();
+  bool success() const;
+  void set_success(bool value);
   private:
-  bool _internal_sucess() const;
-  void _internal_set_sucess(bool value);
+  bool _internal_success() const;
+  void _internal_set_success(bool value);
   public:
 
   // @@protoc_insertion_point(class_scope:fixbug.LoginResponse)
@@ -570,7 +570,7 @@ class LoginResponse PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::fixbug::ResultCode* result_;
-  bool sucess_;
+  bool success_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_user_2eproto;
 };
@@ -589,7 +589,7 @@ class UserServiceRpc : public ::PROTOBUF_NAMESPACE_ID::Service {
 
   static const ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor* descriptor();
 
-  virtual void login(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
+  virtual void Login(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
                        const ::fixbug::LoginRequest* request,
                        ::fixbug::LoginResponse* response,
                        ::google::protobuf::Closure* done);
@@ -622,7 +622,7 @@ class UserServiceRpc_Stub : public UserServiceRpc {
 
   // implements UserServiceRpc ------------------------------------------
 
-  void login(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
+  void Login(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
                        const ::fixbug::LoginRequest* request,
                        ::fixbug::LoginResponse* response,
                        ::google::protobuf::Closure* done);
@@ -644,24 +644,24 @@ class UserServiceRpc_Stub : public UserServiceRpc {
 #endif  // __GNUC__
 // ResultCode
 
-// int32 errorcode = 1;
-inline void ResultCode::clear_errorcode() {
-  errorcode_ = 0;
+// int32 errcode = 1;
+inline void ResultCode::clear_errcode() {
+  errcode_ = 0;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 ResultCode::_internal_errorcode() const {
-  return errorcode_;
+inline ::PROTOBUF_NAMESPACE_ID::int32 ResultCode::_internal_errcode() const {
+  return errcode_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 ResultCode::errorcode() const {
-  // @@protoc_insertion_point(field_get:fixbug.ResultCode.errorcode)
-  return _internal_errorcode();
+inline ::PROTOBUF_NAMESPACE_ID::int32 ResultCode::errcode() const {
+  // @@protoc_insertion_point(field_get:fixbug.ResultCode.errcode)
+  return _internal_errcode();
 }
-inline void ResultCode::_internal_set_errorcode(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void ResultCode::_internal_set_errcode(::PROTOBUF_NAMESPACE_ID::int32 value) {
   
-  errorcode_ = value;
+  errcode_ = value;
 }
-inline void ResultCode::set_errorcode(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_errorcode(value);
-  // @@protoc_insertion_point(field_set:fixbug.ResultCode.errorcode)
+inline void ResultCode::set_errcode(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_errcode(value);
+  // @@protoc_insertion_point(field_set:fixbug.ResultCode.errcode)
 }
 
 // bytes errmsg = 2;
@@ -996,24 +996,24 @@ inline void LoginResponse::set_allocated_result(::fixbug::ResultCode* result) {
   // @@protoc_insertion_point(field_set_allocated:fixbug.LoginResponse.result)
 }
 
-// bool sucess = 2;
-inline void LoginResponse::clear_sucess() {
-  sucess_ = false;
+// bool success = 2;
+inline void LoginResponse::clear_success() {
+  success_ = false;
 }
-inline bool LoginResponse::_internal_sucess() const {
-  return sucess_;
+inline bool LoginResponse::_internal_success() const {
+  return success_;
 }
-inline bool LoginResponse::sucess() const {
-  // @@protoc_insertion_point(field_get:fixbug.LoginResponse.sucess)
-  return _internal_sucess();
+inline bool LoginResponse::success() const {
+  // @@protoc_insertion_point(field_get:fixbug.LoginResponse.success)
+  return _internal_success();
 }
-inline void LoginResponse::_internal_set_sucess(bool value) {
+inline void LoginResponse::_internal_set_success(bool value) {
   
-  sucess_ = value;
+  success_ = value;
 }
-inline void LoginResponse::set_sucess(bool value) {
-  _internal_set_sucess(value);
-  // @@protoc_insertion_point(field_set:fixbug.LoginResponse.sucess)
+inline void LoginResponse::set_success(bool value) {
+  _internal_set_success(value);
+  // @@protoc_insertion_point(field_set:fixbug.LoginResponse.success)
 }
 
 #ifdef __GNUC__

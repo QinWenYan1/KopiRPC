@@ -4,25 +4,21 @@ package fixbug;
 
 option cc_generic_services = true; 
 
-message ResultCode
-{
-    int32 errorcode = 1; 
+message ResultCode{
+    int32 errcode = 1; 
     bytes errmsg = 2; 
 }
 
-message LoginRequest
-{
+message LoginRequest{
     bytes name = 1; 
     bytes pwd = 2; 
 }
 
-message LoginResponse
-{
+message LoginResponse{
     ResultCode result = 1; 
-    bool sucess = 2; 
+    bool success = 2; 
 }
 
-service UserServiceRpc
-{
-    rpc login(LoginRequest) returns (LoginResponse); 
+service UserServiceRpc{
+    rpc Login(LoginRequest) returns (LoginResponse); 
 }

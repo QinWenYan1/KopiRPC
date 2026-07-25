@@ -1,13 +1,14 @@
 #include <iostream>
 #include <string>
-#include "KopirpcApplication.h"
-#include "RpcProvider.h"
+#include "kopirpcapplication.h"
+#include "rpcprovider.h"
 #include "user.pb.h"
 
 /* 提供一个本地的简单服务*/
 class UserService
     : public fixbug::UserServiceRpc  //使用rpc服务发布端（rpc服务提供者）
 {
+ public:
   bool Login(std::string name, std::string pwd) {
     std::cout << "Doing the local service: login..." << std::endl;
     std::cout << "Name: " << name << " pwd: " << pwd << std::endl;
@@ -15,14 +16,14 @@ class UserService
   }
 
   /*
-   * 重写基类UserServiceRpc的徐函数，下面这些方法是框架直接调用的
+   * 重写基类UserServiceRpc的虚函数，下面这些方法是框架直接调用的
    * 1. caller ===> login(loginrequest) ===> muduo ===> callee
    * 2. callee 根据接收到的远端想调用login的请求 ===> 交到下面重写的login方法了
    */
   void Login(::google::protobuf::RpcController* controller,
              const ::fixbug::LoginRequest* request,
              ::fixbug::LoginResponse* response,
-             ::google::protobuf::Closure* done) {
+             ::google::protobuf::Closure* done) override {
     // 1. 框架给业务上报了请求参数loginRequest，业务获取相应数据做本地业务
     std::string name = request->name();
     std::string pwd = request->pwd();
@@ -32,11 +33,11 @@ class UserService
 
     // 3. 把响应写入: 这里表示没有错误
     fixbug::ResultCode* code = response->mutable_result();
-    code->set_errorcode(0);
+    code->set_errcode(0);
     code->set_errmsg("");
-    response->set_sucess(login_result);
+    response->set_success(login_result);
 
-    // 4. 执行回调操作：将login repsonse响应的数据序列化传回远端，通过框架完成的
+    // 4. 执行回调操作：将login response响应的数据序列化传回远端，通过框架完成的
     done->Run();
   }
 };
@@ -45,14 +46,14 @@ int main(int argc, char** argv) {
   /*
    * 调用框架的初始化操作
    * 命令行传入的信息类似于 provider -i config.conf
-   * 来读入网络服务器的IP地址和端口好等
+   * 来读入网络服务器的IP地址和端口号等
    */
   KopirpcApplication::Init(argc, argv);
 
   /*
    * 可以在框架上发布服务的角色：provider是一个网络服务对象
    * 把UserService对象发到rpc节点上
-   * 所以很多客户端都会请求provider, provider必须通过muduo保重高并发
+   * 所以很多客户端都会请求provider, provider必须通过muduo保证高并发
    */
   RpcProvider provider;
   provider.NotifyService(new UserService());

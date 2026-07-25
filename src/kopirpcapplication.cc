@@ -1,4 +1,4 @@
-#include "KopirpcApplication.h"
+#include "kopirpcapplication.h"
 #include <unistd.h>
 #include <iostream>
 #include <string>

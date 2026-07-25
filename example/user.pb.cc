@@ -82,7 +82,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_user_2eproto::offsets[] PROTOB
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::fixbug::ResultCode, errorcode_),
+  PROTOBUF_FIELD_OFFSET(::fixbug::ResultCode, errcode_),
   PROTOBUF_FIELD_OFFSET(::fixbug::ResultCode, errmsg_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::fixbug::LoginRequest, _internal_metadata_),
@@ -97,7 +97,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_user_2eproto::offsets[] PROTOB
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::fixbug::LoginResponse, result_),
-  PROTOBUF_FIELD_OFFSET(::fixbug::LoginResponse, sucess_),
+  PROTOBUF_FIELD_OFFSET(::fixbug::LoginResponse, success_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::fixbug::ResultCode)},
@@ -112,13 +112,13 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 };
 
 const char descriptor_table_protodef_user_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\nuser.proto\022\006fixbug\"/\n\nResultCode\022\021\n\ter"
-  "rorcode\030\001 \001(\005\022\016\n\006errmsg\030\002 \001(\014\")\n\014LoginRe"
-  "quest\022\014\n\004name\030\001 \001(\014\022\013\n\003pwd\030\002 \001(\014\"C\n\rLogi"
-  "nResponse\022\"\n\006result\030\001 \001(\0132\022.fixbug.Resul"
-  "tCode\022\016\n\006sucess\030\002 \001(\0102F\n\016UserServiceRpc\022"
-  "4\n\005login\022\024.fixbug.LoginRequest\032\025.fixbug."
-  "LoginResponseB\003\200\001\001b\006proto3"
+  "\n\nuser.proto\022\006fixbug\"-\n\nResultCode\022\017\n\007er"
+  "rcode\030\001 \001(\005\022\016\n\006errmsg\030\002 \001(\014\")\n\014LoginRequ"
+  "est\022\014\n\004name\030\001 \001(\014\022\013\n\003pwd\030\002 \001(\014\"D\n\rLoginR"
+  "esponse\022\"\n\006result\030\001 \001(\0132\022.fixbug.ResultC"
+  "ode\022\017\n\007success\030\002 \001(\0102F\n\016UserServiceRpc\0224"
+  "\n\005Login\022\024.fixbug.LoginRequest\032\025.fixbug.L"
+  "oginResponseB\003\200\001\001b\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_user_2eproto_deps[1] = {
 };
@@ -129,7 +129,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_use
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_user_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_user_2eproto = {
-  false, false, descriptor_table_protodef_user_2eproto, "user.proto", 266,
+  false, false, descriptor_table_protodef_user_2eproto, "user.proto", 265,
   &descriptor_table_user_2eproto_once, descriptor_table_user_2eproto_sccs, descriptor_table_user_2eproto_deps, 3, 0,
   schemas, file_default_instances, TableStruct_user_2eproto::offsets,
   file_level_metadata_user_2eproto, 3, file_level_enum_descriptors_user_2eproto, file_level_service_descriptors_user_2eproto,
@@ -161,14 +161,14 @@ ResultCode::ResultCode(const ResultCode& from)
     errmsg_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_errmsg(),
       GetArena());
   }
-  errorcode_ = from.errorcode_;
+  errcode_ = from.errcode_;
   // @@protoc_insertion_point(copy_constructor:fixbug.ResultCode)
 }
 
 void ResultCode::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_ResultCode_user_2eproto.base);
   errmsg_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  errorcode_ = 0;
+  errcode_ = 0;
 }
 
 ResultCode::~ResultCode() {
@@ -204,7 +204,7 @@ void ResultCode::Clear() {
   (void) cached_has_bits;
 
   errmsg_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  errorcode_ = 0;
+  errcode_ = 0;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -216,10 +216,10 @@ const char* ResultCode::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID:
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // int32 errorcode = 1;
+      // int32 errcode = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          errorcode_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          errcode_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -259,10 +259,10 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // int32 errorcode = 1;
-  if (this->errorcode() != 0) {
+  // int32 errcode = 1;
+  if (this->errcode() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_errorcode(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_errcode(), target);
   }
 
   // bytes errmsg = 2;
@@ -294,11 +294,11 @@ size_t ResultCode::ByteSizeLong() const {
         this->_internal_errmsg());
   }
 
-  // int32 errorcode = 1;
-  if (this->errorcode() != 0) {
+  // int32 errcode = 1;
+  if (this->errcode() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_errorcode());
+        this->_internal_errcode());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -335,8 +335,8 @@ void ResultCode::MergeFrom(const ResultCode& from) {
   if (from.errmsg().size() > 0) {
     _internal_set_errmsg(from._internal_errmsg());
   }
-  if (from.errorcode() != 0) {
-    _internal_set_errorcode(from._internal_errorcode());
+  if (from.errcode() != 0) {
+    _internal_set_errcode(from._internal_errcode());
   }
 }
 
@@ -362,7 +362,7 @@ void ResultCode::InternalSwap(ResultCode* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   errmsg_.Swap(&other->errmsg_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  swap(errorcode_, other->errorcode_);
+  swap(errcode_, other->errcode_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ResultCode::GetMetadata() const {
@@ -636,15 +636,15 @@ LoginResponse::LoginResponse(const LoginResponse& from)
   } else {
     result_ = nullptr;
   }
-  sucess_ = from.sucess_;
+  success_ = from.success_;
   // @@protoc_insertion_point(copy_constructor:fixbug.LoginResponse)
 }
 
 void LoginResponse::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_LoginResponse_user_2eproto.base);
   ::memset(&result_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&sucess_) -
-      reinterpret_cast<char*>(&result_)) + sizeof(sucess_));
+      reinterpret_cast<char*>(&success_) -
+      reinterpret_cast<char*>(&result_)) + sizeof(success_));
 }
 
 LoginResponse::~LoginResponse() {
@@ -683,7 +683,7 @@ void LoginResponse::Clear() {
     delete result_;
   }
   result_ = nullptr;
-  sucess_ = false;
+  success_ = false;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -702,10 +702,10 @@ const char* LoginResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // bool sucess = 2;
+      // bool success = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          sucess_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          success_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -745,10 +745,10 @@ failure:
         1, _Internal::result(this), target, stream);
   }
 
-  // bool sucess = 2;
-  if (this->sucess() != 0) {
+  // bool success = 2;
+  if (this->success() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(2, this->_internal_sucess(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(2, this->_internal_success(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -774,8 +774,8 @@ size_t LoginResponse::ByteSizeLong() const {
         *result_);
   }
 
-  // bool sucess = 2;
-  if (this->sucess() != 0) {
+  // bool success = 2;
+  if (this->success() != 0) {
     total_size += 1 + 1;
   }
 
@@ -813,8 +813,8 @@ void LoginResponse::MergeFrom(const LoginResponse& from) {
   if (from.has_result()) {
     _internal_mutable_result()->::fixbug::ResultCode::MergeFrom(from._internal_result());
   }
-  if (from.sucess() != 0) {
-    _internal_set_sucess(from._internal_sucess());
+  if (from.success() != 0) {
+    _internal_set_success(from._internal_success());
   }
 }
 
@@ -840,8 +840,8 @@ void LoginResponse::InternalSwap(LoginResponse* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(LoginResponse, sucess_)
-      + sizeof(LoginResponse::sucess_)
+      PROTOBUF_FIELD_OFFSET(LoginResponse, success_)
+      + sizeof(LoginResponse::success_)
       - PROTOBUF_FIELD_OFFSET(LoginResponse, result_)>(
           reinterpret_cast<char*>(&result_),
           reinterpret_cast<char*>(&other->result_));
@@ -865,11 +865,11 @@ const ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor* UserServiceRpc::GetDescriptor(
   return descriptor();
 }
 
-void UserServiceRpc::login(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
+void UserServiceRpc::Login(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
                          const ::fixbug::LoginRequest*,
                          ::fixbug::LoginResponse*,
                          ::google::protobuf::Closure* done) {
-  controller->SetFailed("Method login() not implemented.");
+  controller->SetFailed("Method Login() not implemented.");
   done->Run();
 }
 
@@ -881,7 +881,7 @@ void UserServiceRpc::CallMethod(const ::PROTOBUF_NAMESPACE_ID::MethodDescriptor*
   GOOGLE_DCHECK_EQ(method->service(), file_level_service_descriptors_user_2eproto[0]);
   switch(method->index()) {
     case 0:
-      login(controller,
+      Login(controller,
              ::PROTOBUF_NAMESPACE_ID::internal::DownCast<const ::fixbug::LoginRequest*>(
                  request),
              ::PROTOBUF_NAMESPACE_ID::internal::DownCast<::fixbug::LoginResponse*>(
@@ -931,7 +931,7 @@ UserServiceRpc_Stub::~UserServiceRpc_Stub() {
   if (owns_channel_) delete channel_;
 }
 
-void UserServiceRpc_Stub::login(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
+void UserServiceRpc_Stub::Login(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
                               const ::fixbug::LoginRequest* request,
                               ::fixbug::LoginResponse* response,
                               ::google::protobuf::Closure* done) {
