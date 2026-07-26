@@ -13,8 +13,10 @@ class KopirpcConfig {
   //查询配置项信息
   std::string Load(const std::string& key);
 
-  private:
+ private:
   //私人工具类: 将一列配置信息读入到map当中
-    void ReadLineIntoConfigMap(const std::string&); 
+  void ReadLineIntoConfigMap(const std::string&);
 
+  //将包括#字符及其以后全部删除
+  void Trim(std::string& str);
 };

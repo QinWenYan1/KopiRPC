@@ -38,7 +38,7 @@ void KopirpcConfig::ReadLineIntoConfigMap(const std::string& line) {
 }
 
 //将包括#字符及其以后全部删除
-void Trim(std::string& str){
+void KopirpcConfig::Trim(std::string& str){
     if (str.find('#') != std::string::npos) {
       auto idx = str.find('#');
       str.erase(idx, str.size() - idx);
