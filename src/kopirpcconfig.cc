@@ -37,6 +37,14 @@ void KopirpcConfig::ReadLineIntoConfigMap(const std::string& line) {
   configMap.insert({key, value});
 }
 
+//将包括#字符及其以后全部删除
+void Trim(std::string& str){
+    if (str.find('#') != std::string::npos) {
+      auto idx = str.find('#');
+      str.erase(idx, str.size() - idx);
+    }
+}
+
 //负责解析加载配置文件
 void KopirpcConfig::LoadConfigFile(const char* config_file) {
   /*打开文件输入流*/
@@ -50,11 +58,8 @@ void KopirpcConfig::LoadConfigFile(const char* config_file) {
   /*成功打开文件，开始一行一行阅读*/
   std::string line;
   while (getline(in, line)) {
-    //先处理#字符，将包括#字符及其以后全部删除
-    if (line.find('#') != std::string::npos) {
-      auto idx = line.find('#');
-      line.erase(idx, line.size() - idx);
-    }
+    //删除#字符
+    Trim(line);
     //情况：不是注释行，开始读入
     if (line.find("=") != std::string::npos) ReadLineIntoConfigMap(line);
   }
