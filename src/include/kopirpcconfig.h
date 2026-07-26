@@ -19,4 +19,7 @@ class KopirpcConfig {
 
   //将包括#字符及其以后全部删除
   void TrimSharp(std::string& str);
+
+  //检查此行是不是只有空格或者empty
+  bool BlankLine(const std::string& str);
 };
