@@ -38,7 +38,7 @@ void KopirpcConfig::ReadLineIntoConfigMap(const std::string& line) {
 }
 
 //将包括#字符及其以后全部删除
-void KopirpcConfig::Trim(std::string& str){
+void KopirpcConfig::TrimSharp(std::string& str){
     if (str.find('#') != std::string::npos) {
       auto idx = str.find('#');
       str.erase(idx, str.size() - idx);
@@ -59,7 +59,7 @@ void KopirpcConfig::LoadConfigFile(const char* config_file) {
   std::string line;
   while (getline(in, line)) {
     //删除#字符
-    Trim(line);
+    TrimSharp(line);
     //情况：不是注释行，开始读入
     if (line.find("=") != std::string::npos) ReadLineIntoConfigMap(line);
   }

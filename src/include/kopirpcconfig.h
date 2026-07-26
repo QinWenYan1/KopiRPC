@@ -18,5 +18,5 @@ class KopirpcConfig {
   void ReadLineIntoConfigMap(const std::string&);
 
   //将包括#字符及其以后全部删除
-  void Trim(std::string& str);
+  void TrimSharp(std::string& str);
 };
