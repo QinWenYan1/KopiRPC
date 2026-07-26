@@ -15,4 +15,6 @@ class KopirpcApplication {
   /*拷贝构造函数全部删除*/
   KopirpcApplication(const KopirpcApplication&) = delete;
   KopirpcApplication(const KopirpcApplication&&) = delete;
+  //私人工具函数：用户提示
+  static void ShowArgsHelp();
 };

@@ -4,7 +4,8 @@
 #include <string>
 #include "kopirpcconfig.h"
 
-static void ShowArgsHelp() {
+//私人工具函数：用户提示
+void KopirpcApplication::ShowArgsHelp() {
   std::cout << "format: command -i <configfile>" << std::endl;
 }
 
