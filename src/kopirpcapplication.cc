@@ -40,10 +40,10 @@ void KopirpcApplication::Init(int argc, char** argv) {
    * zookeeper_ip, zookeeper_port
    */
   config.LoadConfigFile(config_file.c_str());
-  std::cout << "rpcserverip:" << config.Load("rpcserverip") << std::endl;
-  std::cout << "rpcserverport:" << config.Load("rpcserverport") << std::endl;
-  std::cout << "zookeeperip:" << config.Load("zookeeperip") << std::endl;
-  std::cout << "zookeeperport:" << config.Load("zookeeperport") << std::endl;
+  std::cout << "RPC Server ip:" << config.Load("rpcserverip") << std::endl;
+  std::cout << "RPC Server port:" << config.Load("rpcserverport") << std::endl;
+  std::cout << "Zookeeper ip:" << config.Load("zookeeperip") << std::endl;
+  std::cout << "Zookeeper port:" << config.Load("zookeeperport") << std::endl;
 }
 
 KopirpcApplication& KopirpcApplication::GetInstance() {

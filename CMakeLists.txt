@@ -2,6 +2,12 @@
 cmake_minimum_required(VERSION 3.16)
 project(KopiRPC)
 
+# 调试选项:
+# 例子: 
+# break kopirpcconfig.cc:17
+# run -i test.conf
+# set(CMAKE_BUILD_TYPE "Debug")
+
 #生成compile_commands.json(clangd 需要)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
