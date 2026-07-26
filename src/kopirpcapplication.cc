@@ -4,13 +4,11 @@
 #include <string>
 #include "kopirpcconfig.h"
 
-
-
 static void ShowArgsHelp() {
   std::cout << "format: command -i <configfile>" << std::endl;
 }
 
-KopirpcConfig KopirpcApplication::config; //类外初始化静态成员
+KopirpcConfig KopirpcApplication::config;  //类外初始化静态成员
 
 void KopirpcApplication::Init(int argc, char** argv) {
   if (argc < 2)  // user没有输入参数，不允许，报错
@@ -42,6 +40,10 @@ void KopirpcApplication::Init(int argc, char** argv) {
    * zookeeper_ip, zookeeper_port
    */
   config.LoadConfigFile(config_file.c_str());
+  std::cout << "rpcserverip:" << config.Load("rpcserverip") << std::endl;
+  std::cout << "rpcserverport:" << config.Load("rpcserverport") << std::endl;
+  std::cout << "zookeeperip:" << config.Load("zookeeperip") << std::endl;
+  std::cout << "zookeeperport:" << config.Load("zookeeperport") << std::endl;
 }
 
 KopirpcApplication& KopirpcApplication::GetInstance() {

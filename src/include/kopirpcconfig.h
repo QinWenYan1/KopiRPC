@@ -12,4 +12,9 @@ class KopirpcConfig {
   void LoadConfigFile(const char* config_file);
   //查询配置项信息
   std::string Load(const std::string& key);
+
+  private:
+  //私人工具类: 将一列配置信息读入到map当中
+    void ReadLineIntoConfigMap(const std::string&); 
+
 };
