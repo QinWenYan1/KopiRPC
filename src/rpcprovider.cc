@@ -6,7 +6,10 @@
 #include <string>
 #include "kopirpcapplication.h"
 
-void RpcProvider::NotifyService(google::protobuf::Service*) {}
+//这是框架提供给外部使用的，可以发布rpc方法的函数接口
+void RpcProvider::NotifyService(google::protobuf::Service*) {
+  
+}
 
 void RpcProvider::Run() {
   //先将配置拿出并配置好
