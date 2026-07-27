@@ -22,7 +22,7 @@ void KopirpcApplication::Init(int argc, char** argv) {
   int c = 0;
   std::string config_file;
   // getopt 逐个消费选项; "i:" 表示 -i 必须带一个参数(即配置文件路径)
-  while ((c = getopt(argc, argv, "i:")) != -1) {
+  if ((c = getopt(argc, argv, "i:")) != -1) {
     switch (c) {
       case 'i':
         config_file = optarg;
@@ -34,6 +34,9 @@ void KopirpcApplication::Init(int argc, char** argv) {
         ShowArgsHelp();
         exit(EXIT_FAILURE);
     }
+  } else { //当 输入 ./provider test.conf 时也会有错误提示
+    ShowArgsHelp();
+    exit(EXIT_FAILURE);
   }
 
   /*开始加载配置文件(约定配置项见 KopirpcConfig 头文件注释)*/
