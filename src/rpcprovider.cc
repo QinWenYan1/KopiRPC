@@ -44,5 +44,5 @@ void RpcProvider::Run() {
 void RpcProvider::onConnection(const muduo::net::TcpConnectionPtr& conn) {}
 
 // TCP 已经建立连接用户的读写回调
-void onMessage(const muduo::net::TcpConnectionPtr& conn,
+void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn,
                muduo::net::Buffer* buf, muduo::Timestamp t) {}
