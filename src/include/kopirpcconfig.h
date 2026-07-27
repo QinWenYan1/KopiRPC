@@ -11,7 +11,7 @@ class KopirpcConfig {
   //负责解析加载配置文件
   void LoadConfigFile(const char* config_file);
   //查询配置项信息
-  std::string Load(const std::string& key);
+  std::string Load(const std::string& key) const;
 
  private:
   //私人工具类: 将一列配置信息读入到map当中

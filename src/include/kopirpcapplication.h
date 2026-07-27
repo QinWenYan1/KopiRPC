@@ -8,6 +8,8 @@ class KopirpcApplication {
  public:
   static void Init(int argc, char** argv);
   static KopirpcApplication& GetInstance();
+  //返回配置文件
+  static const KopirpcConfig& GetConfigFile(); 
 
  private:
   static KopirpcConfig config; 

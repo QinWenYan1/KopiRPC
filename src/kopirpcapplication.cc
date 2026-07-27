@@ -1,7 +1,10 @@
 #include "kopirpcapplication.h"
+
 #include <unistd.h>
+
 #include <iostream>
 #include <string>
+
 #include "kopirpcconfig.h"
 
 //私人工具函数：用户提示
@@ -51,3 +54,6 @@ KopirpcApplication& KopirpcApplication::GetInstance() {
   static KopirpcApplication app;
   return app;
 }
+
+//返回配置文件
+const KopirpcConfig& KopirpcApplication::GetConfigFile() { return config; }

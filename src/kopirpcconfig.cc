@@ -82,7 +82,7 @@ void KopirpcConfig::LoadConfigFile(const char* config_file) {
 }
 
 //查询配置项信息
-std::string KopirpcConfig::Load(const std::string& key) {
+std::string KopirpcConfig::Load(const std::string& key) const {
   auto it = configMap.find(key);
   //不存在key
   if (it == configMap.end()) return "";
