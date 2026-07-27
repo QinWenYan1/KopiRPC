@@ -1,3 +1,4 @@
+// callee 示例: RPC 服务提供者进程 —— 把 UserService 发布到 RPC 节点上
 #include <iostream>
 #include <string>
 #include "kopirpcapplication.h"
@@ -6,61 +7,53 @@
 
 /* 提供一个本地的简单服务*/
 class UserService
-    : public fixbug::UserServiceRpc  //使用rpc服务发布端（rpc服务提供者）
+    : public fixbug::UserServiceRpc  // protoc 由 user.proto 生成的 RPC 接口基类
 {
  public:
+  // 本地业务方法: 真正的登录逻辑(教学演示: 打印参数并恒返回 true)
   bool Login(std::string name, std::string pwd) {
     std::cout << "Doing the local service: login..." << std::endl;
     std::cout << "Name: " << name << " pwd: " << pwd << std::endl;
     return true;
   }
 
-  /*
-   * 重写基类UserServiceRpc的虚函数，下面这些方法是框架直接调用的
-   * 1. caller ===> login(loginrequest) ===> muduo ===> callee
-   * 2. callee 根据接收到的远端想调用login的请求 ===> 交到下面重写的login方法了
-   */
+  // RPC 入口: 重写基类虚函数,框架收到远程 Login 请求后派发到这里
+  //   调用链: caller 发 LoginRequest -> muduo 网络 -> 框架反序列化 -> 本函数
+  //   四个参数的签名由 protobuf 生成的基类固定,业务层只管用不用改
   void Login(::google::protobuf::RpcController* controller,
              const ::fixbug::LoginRequest* request,
              ::fixbug::LoginResponse* response,
              ::google::protobuf::Closure* done) override {
-    // 1. 框架给业务上报了请求参数loginRequest，业务获取相应数据做本地业务
+    // 1. 从请求对象取出参数(框架已完成反序列化)
     std::string name = request->name();
     std::string pwd = request->pwd();
 
-    // 2. 做本地业务
+    // 2. 调用本地业务方法,完成实际逻辑
     bool login_result = Login(name, pwd);
 
-    // 3. 把响应写入: 这里表示没有错误
+    // 3. 填写响应: errcode=0 表示无错误,并带上登录结果
     fixbug::ResultCode* code = response->mutable_result();
     code->set_errcode(0);
     code->set_errmsg("");
     response->set_success(login_result);
 
-    // 4. 执行回调操作：将login response响应的数据序列化传回远端，通过框架完成的
+    // 4. done->Run() 通知框架收尾: 由框架把 response 序列化并发回 caller
     done->Run();
   }
 };
 
 int main(int argc, char** argv) {
-  /*
-   * 调用框架的初始化操作
-   * 命令行传入的信息类似于 provider -i config.conf
-   * 来读入网络服务器的IP地址和端口号等
-   */
+  // 框架初始化: 从 -i 指定的配置文件读入本机 IP/端口、ZK 地址等
+  //   用法示例: provider -i test.conf
   KopirpcApplication::Init(argc, argv);
 
-  /*
-   * 可以在框架上发布服务的角色：provider是一个网络服务对象
-   * 把UserService对象发到rpc节点上
-   * 所以很多客户端都会请求provider, provider必须通过muduo保证高并发
-   */
+  // RpcProvider 是框架的网络服务对象: 把 UserService 发布到 RPC 节点上,
+  // 之后大量 caller 的并发请求由 muduo 网络层承载
   RpcProvider provider;
-  provider.NotifyService(new UserService());
+  provider.NotifyService(new UserService());  // 对象随进程存活,无需释放
 
-  //启动一个rpc服务发布节点
-  // Run以后，进程进入阻塞状态，等待远程rpc调用请求
-  //这里相当于UserService的void login()
+  // 启动 RPC 服务节点: Run() 阻塞于此,进程进入事件循环等待远程调用
+  // 此后对 caller 来说,远程调 Login 就像调本地方法(网络细节全被框架藏掉)
   provider.Run();
 
   return 0;
