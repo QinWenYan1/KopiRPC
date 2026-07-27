@@ -1,4 +1,5 @@
 #include "rpcprovider.h"
+#include <muduo/net/Callbacks.h>
 #include <muduo/net/InetAddress.h>
 #include <muduo/net/TcpServer.h>
 #include <string>
@@ -17,18 +18,37 @@ void RpcProvider::Run() {
                            .c_str());
   muduo::net::InetAddress address(ip, port);
   //启动 TCP 服务器对象
-  muduo::net::TcpServer server(eventLoop, address,"RPCProvider"); 
+  muduo::net::TcpServer server(&eventLoop, address,"RPCProvider"); 
   //绑定回调和消息读写回调方法
   //muduo帮我们分离了网络代码和业务代码
   //我们只需要关注有没有链接，以及有没有新的读写事件
-  //server.setConnectionCallback();
+  server.setConnectionCallback(
+    [this](const muduo::net::TcpConnectionPtr& conn){
+      this->onConnection(conn);
+    }
+  );
+
+  server.setMessageCallback([this](const muduo::net::TcpConnectionPtr& conn, muduo::net::Buffer* buf, muduo::Timestamp t){
+    this->onMessage(conn,buf,t);
+  });
 
 
   //设置muduo库的线程数量
   server.setThreadNum(4); 
+
+  //启动网络服务
+  server.start(); 
+  //以阻塞方式等待远程连接
+  eventLoop.loop();
+
 }
 
   //新来的socket的链接事件的回调
-void RpcProvider::onConnection(const muduo::net::TcpConnection&){
+void RpcProvider::onConnection(const muduo::net::TcpConnectionPtr& conn){
+
+}
+
+//TCP 已经建立连接用户的读写回调
+void onMessage(const muduo::net::TcpConnectionPtr& conn, muduo::net::Buffer* buf, muduo::Timestamp t){
 
 }

@@ -1,5 +1,8 @@
 #pragma once
 #include <google/protobuf/service.h>
+#include <muduo/base/Timestamp.h>
+#include <muduo/net/Buffer.h>
+#include <muduo/net/Callbacks.h>
 #include <muduo/net/TcpConnection.h>
 #include <memory>
 #include "muduo/net/EventLoop.h"
@@ -27,8 +30,10 @@ class RpcProvider {
 
  private:
   // 事件循环(muduo Reactor 核心),Run() 中驱动网络 IO
-  muduo::net::EventLoop* eventLoop;
+  muduo::net::EventLoop eventLoop;
 
   // TCP 连接建立/断开时的回调(注册给 TcpServer,由 muduo 触发)
-  void onConnection(const muduo::net::TcpConnection&);
+  void onConnection(const muduo::net::TcpConnectionPtr&);
+  //TCP 已经建立连接用户的读写回调
+  void onMessage(const muduo::net::TcpConnectionPtr&, muduo::net::Buffer*, muduo::Timestamp);
 };
