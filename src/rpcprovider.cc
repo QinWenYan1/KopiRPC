@@ -7,9 +7,7 @@
 #include "kopirpcapplication.h"
 
 //这是框架提供给外部使用的，可以发布rpc方法的函数接口
-void RpcProvider::NotifyService(google::protobuf::Service*) {
-  
-}
+void RpcProvider::NotifyService(google::protobuf::Service*) {}
 
 void RpcProvider::Run() {
   //先将配置拿出并配置好
@@ -37,8 +35,8 @@ void RpcProvider::Run() {
   //设置muduo库的线程数量
   server.setThreadNum(4);
 
-  std::cout << "RPC Provider start service at IP: " 
-        << ip << " Port: " << port << std::endl; 
+  std::cout << "RPC Provider start service at IP: " << ip << " Port: " << port
+            << std::endl;
 
   //启动网络服务
   server.start();
@@ -51,4 +49,4 @@ void RpcProvider::onConnection(const muduo::net::TcpConnectionPtr& conn) {}
 
 // TCP 已经建立连接用户的读写回调
 void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn,
-               muduo::net::Buffer* buf, muduo::Timestamp t) {}
+                            muduo::net::Buffer* buf, muduo::Timestamp t) {}
