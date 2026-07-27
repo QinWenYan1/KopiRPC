@@ -6,24 +6,29 @@
 #include "muduo/net/InetAddress.h"
 #include "muduo/net/TcpServer.h"
 
-//框架提供的专门服务发布rpc服务的网络对象类
+// RpcProvider —— 框架提供的 RPC 服务发布器
+//
+// 使用方(callee 业务,如 UserService)两步把本地服务暴露为 RPC 服务:
+//   1. NotifyService(service): 登记一个 protobuf 生成的服务对象
+//   2. Run(): 启动网络节点,监听端口并响应远程调用(阻塞,不返回)
+//
+// 设计要点: 框架不依赖任何具体业务——登记接口统一接收基类指针
+// google::protobuf::Service*,因此任何 .proto 定义的服务都能发布
 class RpcProvider {
  public:
-  /*
-   * 我们开发的是框架，然而框架一定不能依赖于具体某个业务
-   * 也就是说不能只是能发布UserService类的服务
-   * 还可以发布UserService基类Service类的服务指针
-   * 这里是框架提供给外部使用的，可以发布rpc方法的函数接口
-   */
+  // 登记一个 RPC 服务对象
+  //   service: protobuf 生成的服务派生类实例(必须继承
+  //            google::protobuf::Service);框架不接管其生命周期,
+  //            调用方需保证它在 Run() 期间始终存活
   void NotifyService(google::protobuf::Service*);
 
-  /*启动rpc服务节点，开始提供rpc远程网络调用服务*/
+  // 启动 RPC 服务节点: 读取配置 -> 监听端口 -> 进入事件循环(阻塞)
   void Run();
 
  private:
-  //组合event loop
+  // 事件循环(muduo Reactor 核心),Run() 中驱动网络 IO
   muduo::net::EventLoop* eventLoop;
 
-  //新来的socket的链接事件的回调
+  // TCP 连接建立/断开时的回调(注册给 TcpServer,由 muduo 触发)
   void onConnection(const muduo::net::TcpConnection&);
 };
