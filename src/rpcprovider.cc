@@ -34,6 +34,9 @@ void RpcProvider::Run() {
   //设置muduo库的线程数量
   server.setThreadNum(4);
 
+  std::cout << "RPC Provider start service at IP: " 
+        << ip << " Port: " << port << std::endl; 
+
   //启动网络服务
   server.start();
   //以阻塞方式等待远程连接
