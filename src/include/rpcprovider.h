@@ -1,9 +1,10 @@
 #pragma once
 #include <google/protobuf/service.h>
-#include "muduo/net/TcpServer.h"
+#include <muduo/net/TcpConnection.h>
+#include <memory>
 #include "muduo/net/EventLoop.h"
 #include "muduo/net/InetAddress.h"
-#include <memory>
+#include "muduo/net/TcpServer.h"
 
 //框架提供的专门服务发布rpc服务的网络对象类
 class RpcProvider {
@@ -18,8 +19,11 @@ class RpcProvider {
 
   /*启动rpc服务节点，开始提供rpc远程网络调用服务*/
   void Run();
-private: 
-  //组合event loop 
+
+ private:
+  //组合event loop
   muduo::net::EventLoop* eventLoop;
 
+  //新来的socket的链接事件的回调
+  void onConnection(const muduo::net::TcpConnection&);
 };
