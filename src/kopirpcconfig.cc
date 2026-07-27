@@ -1,5 +1,4 @@
 #include "kopirpcconfig.h"
-
 #include <cctype>
 #include <cstdlib>
 #include <fstream>

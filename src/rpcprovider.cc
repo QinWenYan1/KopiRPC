@@ -1,11 +1,9 @@
 #include "rpcprovider.h"
-
 #include <muduo/net/InetAddress.h>
 #include <muduo/net/TcpServer.h>
-
 #include <string>
-
 #include "kopirpcapplication.h"
+#include <functional>
 
 void RpcProvider::NotifyService(google::protobuf::Service*) {}
 

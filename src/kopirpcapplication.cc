@@ -1,10 +1,7 @@
 #include "kopirpcapplication.h"
-
 #include <unistd.h>
-
 #include <iostream>
 #include <string>
-
 #include "kopirpcconfig.h"
 
 //私人工具函数：用户提示
