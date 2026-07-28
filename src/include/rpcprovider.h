@@ -34,7 +34,7 @@ class RpcProvider {
 
   // TCP 连接建立/断开时的回调(注册给 TcpServer,由 muduo 触发)
   void onConnection(const muduo::net::TcpConnectionPtr&);
-  // TCP 已经建立连接用户的读写回调
+  // TCP 已经建立连接用户的读写回调(注册给 TcpServer,由 muduo 触发)
   void onMessage(const muduo::net::TcpConnectionPtr&, muduo::net::Buffer*,
                  muduo::Timestamp);
 };
