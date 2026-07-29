@@ -101,6 +101,8 @@ void RpcProvider::onConnection(const muduo::net::TcpConnectionPtr& conn) {
  * 因此通过proto中的message的定义定义一个数据头，来区分
  * 同时还有一个问题由于请求时连续的，会有TCP粘包现象
  * 因此还要记录args段的长度，来区分message的尾部
+ * headerSize + serviceName + methodName + argsSize
+ * 而argsStr则在下一个message里面
  */
 
 // 已经建立连接用户的读写回调,如果cient有一个rpc服务请求时，onMessage就会响应
