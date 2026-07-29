@@ -1,10 +1,11 @@
 #pragma once
+#include <google/protobuf/descriptor.h>
 #include <google/protobuf/service.h>
 #include <muduo/base/Timestamp.h>
 #include <muduo/net/Buffer.h>
 #include <muduo/net/Callbacks.h>
 #include <muduo/net/TcpConnection.h>
-#include <memory>
+#include <unordered_map>
 #include "muduo/net/EventLoop.h"
 #include "muduo/net/InetAddress.h"
 #include "muduo/net/TcpServer.h"
@@ -31,6 +32,17 @@ class RpcProvider {
  private:
   // 事件循环(muduo Reactor 核心),Run() 中驱动网络 IO
   muduo::net::EventLoop eventLoop;
+
+  // service服务类型信息
+  struct ServiceInfo {
+    google::protobuf::Service* serv;  //服务对象
+    std::unordered_map<std::string,
+                       const google::protobuf::MethodDescriptor*>
+        methodMap;  //保存方法对象：key是method名字，value时描述符
+  };
+
+  //存放映射关系
+  std::unordered_map<std::string, ServiceInfo> serviceMap;
 
   // TCP 连接建立/断开时的回调(注册给 TcpServer,由 muduo 触发)
   void onConnection(const muduo::net::TcpConnectionPtr&);
