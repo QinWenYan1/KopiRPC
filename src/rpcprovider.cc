@@ -1,11 +1,15 @@
 #include "rpcprovider.h"
+
 #include <google/protobuf/descriptor.h>
 #include <muduo/net/Callbacks.h>
 #include <muduo/net/InetAddress.h>
 #include <muduo/net/TcpServer.h>
+
+#include <cstdint>
 #include <cstring>
 #include <functional>
 #include <string>
+
 #include "kopirpcapplication.h"
 #include "rpcheader.pb.h"
 /*
@@ -112,10 +116,25 @@ void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn,
   //根据Header size 读取数据头的原始数据流: 掠过前4个字节得到rpc请求的详细信息
   std::string rpcHeaderStr = recvBuf.substr(4, headerSize);
   kopirpc::RpcHeader rpcHeader;
+  std::string serviceName, methodName;
+  uint32_t argsSize = 0;
   if (rpcHeader.ParseFromString(rpcHeaderStr)) {
     //数据化反序列成功
+    serviceName = rpcHeader.servicename();
+    methodName = rpcHeader.methodname();
+    argsSize = rpcHeader.argssize();
   } else {
     //数据反序列化失败
     std::cout << "rpc Header " << rpcHeaderStr << " parse error" << std::endl;
+    return;
   }
+  //获取rpc方法参数的字符流数据
+  std::string argsStr = recvBuf.substr(headerSize + 4, argsSize);
+  //打印调试信息
+  std::cout << "==============================================" << std::endl;
+  std::cout << "header size: " << headerSize << std::endl;
+  std::cout << "rpc header content: " << rpcHeaderStr << std::endl;
+  std::cout << "service name: " << serviceName << std::endl;
+  std::cout << "method name: " << methodName << std::endl;
+  std::cout << "==============================================" << std::endl;
 }
