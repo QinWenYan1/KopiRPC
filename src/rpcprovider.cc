@@ -110,6 +110,10 @@ void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn,
   std::string recvBuf = buf->retrieveAllAsString();
 
   //从字符流中读取前4个字节的字符流的内容
+  /*
+   * message 从不在自己肚子里记自己的长度——长度永远写在"外面一层"：嵌套的靠父
+   * message 记，最外层的没人替它记，所以框架手动在开头贴上 4 个字节
+   */
   uint32_t headerSize = 0;
   std::memcpy(&headerSize, recvBuf.data(), sizeof(headerSize));
 
@@ -136,5 +140,6 @@ void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn,
   std::cout << "rpc header content: " << rpcHeaderStr << std::endl;
   std::cout << "service name: " << serviceName << std::endl;
   std::cout << "method name: " << methodName << std::endl;
+  std::cout << "args str: " << argsStr << std::endl;
   std::cout << "==============================================" << std::endl;
 }

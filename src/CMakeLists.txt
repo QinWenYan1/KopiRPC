@@ -1,3 +1,4 @@
+#懒加载，不会自动识别新添加的文件
 aux_source_directory(. SRC_LIST)
 #静态库
 add_library(KopiRPC ${SRC_LIST}) 
