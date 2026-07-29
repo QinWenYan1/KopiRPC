@@ -8,25 +8,32 @@
 #include "kopirpcapplication.h"
 
 /*
-*service_name对应一个service描述符
-*       service描述符对应一个或多个method 方法描述符（或者没有）
-*/
+ * servName对应一个service描述符
+ *       service描述符对应一个或多个method 方法描述符（或者没有）
+ */
 
 //这是框架提供给外部使用的，可以发布rpc方法的函数接口
 void RpcProvider::NotifyService(google::protobuf::Service* service) {
+  ServiceInfo servInfo;
   //获取服务对象的描述信息
   const google::protobuf::ServiceDescriptor* serviceDescPtr =
       service->GetDescriptor();
   //获取服务的名字
-  std::string service_name = serviceDescPtr->name();
+  std::string servName = serviceDescPtr->name();
   //获取类对象方法的数量
   int methodCnt = serviceDescPtr->method_count();
 
+  //将方法+方法名字注册到该服务的映射信息中
   for (int i = 0; i < methodCnt; ++i) {
     //获取服务对象指定下标的服务方法的描述（抽象描述）
     const google::protobuf::MethodDescriptor* methodDescPtr =
         serviceDescPtr->method(i);
+    servInfo.methodMap.insert({methodDescPtr->name(), methodDescPtr});
   }
+
+  //将该服务的信息注册到provider中
+  servInfo.serv = service;
+  serviceMap.insert({servName, servInfo});
 }
 
 void RpcProvider::Run() {
