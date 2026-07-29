@@ -1,4 +1,5 @@
 #include "rpcprovider.h"
+#include <google/protobuf/descriptor.h>
 #include <muduo/net/Callbacks.h>
 #include <muduo/net/InetAddress.h>
 #include <muduo/net/TcpServer.h>
@@ -7,7 +8,15 @@
 #include "kopirpcapplication.h"
 
 //这是框架提供给外部使用的，可以发布rpc方法的函数接口
-void RpcProvider::NotifyService(google::protobuf::Service*) {}
+void RpcProvider::NotifyService(google::protobuf::Service* service) {
+  //获取服务对象的描述信息
+  const google::protobuf::ServiceDescriptor* serviceDescPtr = service->GetDescriptor(); 
+  //获取服务的名字
+  std::string service_name = serviceDescPtr->name(); 
+  //获取类对象方法的数量
+  int methodCnt = serviceDescPtr->method_count(); 
+
+}
 
 void RpcProvider::Run() {
   //先将配置拿出并配置好
