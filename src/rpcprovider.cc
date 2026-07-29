@@ -79,8 +79,28 @@ void RpcProvider::Run() {
 }
 
 //新来的socket的链接事件的回调
-void RpcProvider::onConnection(const muduo::net::TcpConnectionPtr& conn) {}
+void RpcProvider::onConnection(const muduo::net::TcpConnectionPtr& conn) {
+  if (!conn->connected()) {
+    //和rpc client的链接断开了
+    conn->shutdown();
+  }
+}
 
-// TCP 已经建立连接用户的读写回调
+/*
+ * 在框架内部，RpcProvider和RpcConsumer需要协商好通讯之间protobuf数据类型
+ * 在RpcProvider中，我们通过：
+ *   1. Service name 找到 Service
+ *   2. Method name 找到 Method
+ *   3. args 调用 Method
+ * 所以需要这三个信息，但是需要去判断序列化后哪一段时Service name，Method name
+ * 因此通过proto中的message的定义定义一个数据头，来区分
+ * 同时还有一个问题由于请求时连续的，会有TCP粘包现象
+ * 因此还要记录args段的长度，来区分message的尾部
+ */
+
+// 已经建立连接用户的读写回调,如果cient有一个rpc服务请求时，onMessage就会响应
 void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn,
-                            muduo::net::Buffer* buf, muduo::Timestamp t) {}
+                            muduo::net::Buffer* buf, muduo::Timestamp t) {
+  //网络上接受的远程rpc调用请求的字符流，包含了1.函数名，2.参数
+  std::string recvBuf = buf->retrieveAllAsString();
+}
