@@ -84,5 +84,11 @@
 - ~~[x] 配置容器化开发环境（Docker + Muduo + ZooKeeper）~~
 - ~~[x] 搭建编译逻辑与环境（CMake 构建体系 + clangd）~~
 - ~~[x] 搭建 RPC 基本框架~~
+- ~~[x] 实现 RPC 服务发布（基于 protobuf 反射的服务/方法注册）~~
+- [ ] 完成 provider 请求处理（拆包解析 → 方法分发 → 响应回发）
+- [ ] 实现 caller 调用通道（RpcChannel:stub 像本地调用一样发起远程请求）
+- [ ] 接入 ZooKeeper 服务注册与发现
+- [ ] 端到端联调(provider + caller 跑通示例服务)
+- [ ] 进阶特性:异步调用、负载均衡、重试、健康检查、熔断、长连接/连接池
 
 
