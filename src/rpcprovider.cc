@@ -22,13 +22,17 @@ void RpcProvider::NotifyService(google::protobuf::Service* service) {
   std::string servName = serviceDescPtr->name();
   //获取类对象方法的数量
   int methodCnt = serviceDescPtr->method_count();
+  //打印信息
+  std::cout << "Service name: " << servName << std::endl;
 
   //将方法+方法名字注册到该服务的映射信息中
   for (int i = 0; i < methodCnt; ++i) {
     //获取服务对象指定下标的服务方法的描述（抽象描述）
     const google::protobuf::MethodDescriptor* methodDescPtr =
         serviceDescPtr->method(i);
-    servInfo.methodMap.insert({methodDescPtr->name(), methodDescPtr});
+    std::string methodName = methodDescPtr->name();
+    servInfo.methodMap.insert({methodName, methodDescPtr});
+    std::cout << "method name: " << methodName << std::endl;
   }
 
   //将该服务的信息注册到provider中
