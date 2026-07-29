@@ -22,7 +22,7 @@ class RpcProvider {
  public:
   // 登记一个 RPC 服务对象
   //   service: protobuf 生成的服务派生类实例(必须继承
-  //            google::protobuf::Service);框架不接管其生命周期,
+  //            google::protobuf::Service*);框架不接管其生命周期,
   //            调用方需保证它在 Run() 期间始终存活
   void NotifyService(google::protobuf::Service*);
 
@@ -33,20 +33,20 @@ class RpcProvider {
   // 事件循环(muduo Reactor 核心),Run() 中驱动网络 IO
   muduo::net::EventLoop eventLoop;
 
-  // service服务类型信息
+  // 一个服务的注册信息: 服务对象 + 方法表
   struct ServiceInfo {
-    google::protobuf::Service* serv;  //服务对象
+    google::protobuf::Service* serv;  // 服务对象
     std::unordered_map<std::string,
                        const google::protobuf::MethodDescriptor*>
-        methodMap;  //保存方法对象：key是method名字，value时描述符
+        methodMap;  // 方法名 -> 方法描述符
   };
 
-  //存放映射关系
+  // 服务名 -> 服务注册信息
   std::unordered_map<std::string, ServiceInfo> serviceMap;
 
   // TCP 连接建立/断开时的回调(注册给 TcpServer,由 muduo 触发)
   void onConnection(const muduo::net::TcpConnectionPtr&);
-  // TCP 已经建立连接用户的读写回调(注册给 TcpServer,由 muduo 触发)
+  // 连接上有数据可读时的回调(注册给 TcpServer,由 muduo 触发)
   void onMessage(const muduo::net::TcpConnectionPtr&, muduo::net::Buffer*,
                  muduo::Timestamp);
 };

@@ -12,30 +12,28 @@
 
 #include "kopirpcapplication.h"
 #include "rpcheader.pb.h"
+
 /*
  * servName对应一个service描述符
  *       service描述符对应一个或多个method 方法描述符（或者没有）
  *
  * json: 文本结构，key-value对
- * profobuf: 二进制，还能抽象方法
+ * protobuf: 二进制，还能抽象方法
  */
 
-//这是框架提供给外部使用的，可以发布rpc方法的函数接口
+// 这是框架提供给外部使用的，可以发布rpc方法的函数接口
 void RpcProvider::NotifyService(google::protobuf::Service* service) {
   ServiceInfo servInfo;
-  //获取服务对象的描述信息
+
+  // 借助 protobuf 反射拿到服务描述符: 从中取服务名和全部方法描述
   const google::protobuf::ServiceDescriptor* serviceDescPtr =
       service->GetDescriptor();
-  //获取服务的名字
   std::string servName = serviceDescPtr->name();
-  //获取类对象方法的数量
   int methodCnt = serviceDescPtr->method_count();
-  //打印信息
   std::cout << "Service name: " << servName << std::endl;
 
-  //将方法+方法名字注册到该服务的映射信息中
+  // 把每个方法以 方法名 -> 方法描述符 登记进 methodMap
   for (int i = 0; i < methodCnt; ++i) {
-    //获取服务对象指定下标的服务方法的描述（抽象描述）
     const google::protobuf::MethodDescriptor* methodDescPtr =
         serviceDescPtr->method(i);
     std::string methodName = methodDescPtr->name();
@@ -43,13 +41,13 @@ void RpcProvider::NotifyService(google::protobuf::Service* service) {
     std::cout << "method name: " << methodName << std::endl;
   }
 
-  //将该服务的信息注册到provider中
+  // 整个服务以 服务名 -> 服务信息 登记进注册表
   servInfo.serv = service;
   serviceMap.insert({servName, servInfo});
 }
 
 void RpcProvider::Run() {
-  //先将配置拿出并配置好
+  // 从配置文件读出本节点的 ip 和 port
   std::string ip =
       KopirpcApplication::GetInstance().GetConfigFile().Load("rpcserverip");
   uint16_t port = atoi(KopirpcApplication::GetInstance()
@@ -57,11 +55,10 @@ void RpcProvider::Run() {
                            .Load("rpcserverport")
                            .c_str());
   muduo::net::InetAddress address(ip, port);
-  //启动 TCP 服务器对象
+
+  // 创建 TCP 服务器并注册回调: muduo 把网络 IO 和业务代码分离,
+  // 框架只需关心"连接有没有建立/断开"和"有没有数据可读"
   muduo::net::TcpServer server(&eventLoop, address, "RPCProvider");
-  //绑定回调和消息读写回调方法
-  // muduo帮我们分离了网络代码和业务代码
-  //我们只需要关注有没有链接，以及有没有新的读写事件
   server.setConnectionCallback(
       [this](const muduo::net::TcpConnectionPtr& conn) {
         this->onConnection(conn);
@@ -71,72 +68,65 @@ void RpcProvider::Run() {
       [this](const muduo::net::TcpConnectionPtr& conn, muduo::net::Buffer* buf,
              muduo::Timestamp t) { this->onMessage(conn, buf, t); });
 
-  //设置muduo库的线程数量
+  // 设置 muduo 的 IO 线程数(多 Reactor 线程池大小)
   server.setThreadNum(4);
 
   std::cout << "RPC Provider start service at IP: " << ip << " Port: " << port
             << std::endl;
 
-  //启动网络服务
+  // 启动网络服务,进入事件循环(阻塞,此后一切由回调驱动)
   server.start();
-  //以阻塞方式等待远程连接
   eventLoop.loop();
 }
 
-//新来的socket的链接事件的回调
+// 连接建立/断开时触发
 void RpcProvider::onConnection(const muduo::net::TcpConnectionPtr& conn) {
   if (!conn->connected()) {
-    //和rpc client的链接断开了
+    // 和 rpc client 的连接断开了
     conn->shutdown();
   }
 }
 
 /*
- * 在框架内部，RpcProvider和RpcConsumer需要协商好通讯之间protobuf数据类型
- * 在RpcProvider中，我们通过：
- *   1. Service name 找到 Service
- *   2. Method name 找到 Method
- *   3. args 调用 Method
- * 所以需要这三个信息，但是需要去判断序列化后哪一段时Service name，Method name
- * 因此通过proto中的message的定义定义一个数据头，来区分
- * 同时还有一个问题由于请求时连续的，会有TCP粘包现象
- * 因此还要记录args段的长度，来区分message的尾部
- * headerSize + serviceName + methodName + argsSize
- * 而argsStr则在下一个message里面
+ * provider 和 caller 约定好的私有协议帧格式:
+ *   [4字节 headerSize][headerSize 字节的 RpcHeader][argsSize 字节的 args]
+ * 一帧必须能回答三个问题: 调哪个 service、哪个 method、参数是什么;
+ * 而 TCP 是字节流会粘包,所以还要回答"每段在哪结束":
+ *   帧首固定 4 字节给出 RpcHeader 的边界,RpcHeader 里的 argsSize 给出整帧的边界
  */
 
-// 已经建立连接用户的读写回调,如果cient有一个rpc服务请求时，onMessage就会响应
+// 连接上有数据可读时触发: 解析一帧 RPC 请求
 void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn,
                             muduo::net::Buffer* buf, muduo::Timestamp t) {
-  //网络上接受的远程rpc调用请求的字符流，包含了1.函数名，2.参数
+  // 取出本次收到的全部字节(粘包时可能不止一帧,当前按一帧解析)
   std::string recvBuf = buf->retrieveAllAsString();
 
-  //从字符流中读取前4个字节的字符流的内容
   /*
-   * message 从不在自己肚子里记自己的长度——长度永远写在"外面一层"：嵌套的靠父
-   * message 记，最外层的没人替它记，所以框架手动在开头贴上 4 个字节
+   * message 从不在自己肚子里记自己的长度——长度永远写在"外面一层":嵌套的靠父
+   * message 记,最外层的没人替它记,所以框架手动在开头贴上 4 个字节
    */
   uint32_t headerSize = 0;
   std::memcpy(&headerSize, recvBuf.data(), sizeof(headerSize));
 
-  //根据Header size 读取数据头的原始数据流: 掠过前4个字节得到rpc请求的详细信息
+  // 按 headerSize 切出 RpcHeader 段并反序列化,得到 service/method 名和 argsSize
   std::string rpcHeaderStr = recvBuf.substr(4, headerSize);
   kopirpc::RpcHeader rpcHeader;
   std::string serviceName, methodName;
   uint32_t argsSize = 0;
   if (rpcHeader.ParseFromString(rpcHeaderStr)) {
-    //数据化反序列成功
     serviceName = rpcHeader.servicename();
     methodName = rpcHeader.methodname();
     argsSize = rpcHeader.argssize();
   } else {
-    //数据反序列化失败
+    // 请求头损坏,丢弃本次请求
     std::cout << "rpc Header " << rpcHeaderStr << " parse error" << std::endl;
     return;
   }
-  //获取rpc方法参数的字符流数据
+
+  // 按 argsSize 切出参数段(caller 传来的请求 message 的序列化字节)
   std::string argsStr = recvBuf.substr(headerSize + 4, argsSize);
-  //打印调试信息
+
+  // 打印调试信息
   std::cout << "==============================================" << std::endl;
   std::cout << "header size: " << headerSize << std::endl;
   std::cout << "rpc header content: " << rpcHeaderStr << std::endl;
