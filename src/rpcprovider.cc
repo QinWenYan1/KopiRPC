@@ -10,6 +10,9 @@
 /*
  * servName对应一个service描述符
  *       service描述符对应一个或多个method 方法描述符（或者没有）
+ *
+ * json: 文本结构，key-value对
+ * profobuf: 二进制，还能抽象方法
  */
 
 //这是框架提供给外部使用的，可以发布rpc方法的函数接口
