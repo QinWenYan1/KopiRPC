@@ -3,10 +3,11 @@
 #include <muduo/net/Callbacks.h>
 #include <muduo/net/InetAddress.h>
 #include <muduo/net/TcpServer.h>
+#include <cstring>
 #include <functional>
 #include <string>
 #include "kopirpcapplication.h"
-
+#include "rpcheader.pb.h"
 /*
  * servName对应一个service描述符
  *       service描述符对应一个或多个method 方法描述符（或者没有）
@@ -103,4 +104,18 @@ void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn,
                             muduo::net::Buffer* buf, muduo::Timestamp t) {
   //网络上接受的远程rpc调用请求的字符流，包含了1.函数名，2.参数
   std::string recvBuf = buf->retrieveAllAsString();
+
+  //从字符流中读取前4个字节的字符流的内容
+  uint32_t headerSize = 0;
+  std::memcpy(&headerSize, recvBuf.data(), sizeof(headerSize));
+
+  //根据Header size 读取数据头的原始数据流: 掠过前4个字节得到rpc请求的详细信息
+  std::string rpcHeaderStr = recvBuf.substr(4, headerSize);
+  kopirpc::RpcHeader rpcHeader;
+  if (rpcHeader.ParseFromString(rpcHeaderStr)) {
+    //数据化反序列成功
+  } else {
+    //数据反序列化失败
+    std::cout << "rpc Header " << rpcHeaderStr << " parse error" << std::endl;
+  }
 }
