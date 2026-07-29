@@ -1,7 +1,10 @@
 #include "kopirpcapplication.h"
+
 #include <unistd.h>
+
 #include <iostream>
 #include <string>
+
 #include "kopirpcconfig.h"
 
 void KopirpcApplication::ShowArgsHelp() {
@@ -34,7 +37,7 @@ void KopirpcApplication::Init(int argc, char** argv) {
         ShowArgsHelp();
         exit(EXIT_FAILURE);
     }
-  } else { //当 输入 ./provider test.conf 时也会有错误提示
+  } else {  //当 输入 ./provider test.conf 时也会有错误提示
     ShowArgsHelp();
     exit(EXIT_FAILURE);
   }
