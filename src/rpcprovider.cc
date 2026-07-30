@@ -6,6 +6,7 @@
 #include <muduo/net/TcpServer.h>
 
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <functional>
 #include <string>
@@ -134,4 +135,12 @@ void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn,
   std::cout << "method name: " << methodName << std::endl;
   std::cout << "args str: " << argsStr << std::endl;
   std::cout << "==============================================" << std::endl;
+
+  //获取service对象和method对象
+  auto item = serviceMap.find(serviceName); 
+  if (item == serviceMap.end()){
+    std::cout << serviceName << " is not existed!" << std::endl; 
+    return; 
+  }
+  
 }
