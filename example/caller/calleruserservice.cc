@@ -1,15 +1,21 @@
 #include <iostream>
+
 #include "KopirpcApplication.h"
+#include "user.pb.h"
 
 /*
-* example属于是业务代码，包括caller + callee
-*/
+ * example属于是业务代码，包括caller + callee
+ */
 
-int main(int argc, char* argv[]){
-    //整个程序启动以后，想要使用KopiRpc框架服务，一定要调用框架的初始化函数
-    //只需要初始化一次
-    KopirpcApplication::Init(argc, argv);
+int main(int argc, char* argv[]) {
+  //整个程序启动以后，想要使用KopiRpc框架服务，一定要调用框架的初始化函数
+  //只需要初始化一次
+  KopirpcApplication::Init(argc, argv);
 
-    return 0; 
-
+  //演示调用远程发布的rpc方法login
+  // caller -> stub -> RpcChannel
+  // RpcChannel -> RpcChannel::callMethod
+  // 集中来做所有的rpc方法调用的参数序列化和网络发送
+  //但是RpcChannel是虚类，需要用户自己手动实现
+  return 0;
 }
