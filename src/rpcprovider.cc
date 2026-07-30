@@ -176,10 +176,17 @@ void RpcProvider::OnMessage(const muduo::net::TcpConnectionPtr& conn,
           this, &RpcProvider::SendRpcResponse, conn, response);
 
   //在框架上根据远端rpc请求，调用当前rpc节点上发布的方法
-  //实现：new UserService().login(controller, request, )
+  //实现：new UserService().login(controller, request, response, done)
   service->CallMethod(method, nullptr, request, response, done);
 }
 
 // Closure的回调操作，用于序列化rpc的response和网络发送
-void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr&,
-                                  google::protobuf::Message* res) {}
+void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr& conn,
+                                  google::protobuf::Message* res) {
+  std::string responseStr;
+  // response进行序列化，序列化成功后，通过网络把rpc方法执行的结果发送回rpc调用方
+  if (res->SerializeToString(&responseStr)) {
+    conn->send(responseStr);
+    conn->shutdown(); //模拟http的短链接服务，由rpcprovider主动断开链接
+  }
+}
