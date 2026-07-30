@@ -3,6 +3,7 @@
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/message.h>
 #include <google/protobuf/service.h>
+#include <google/protobuf/stubs/callback.h>
 #include <muduo/net/Callbacks.h>
 #include <muduo/net/InetAddress.h>
 #include <muduo/net/TcpServer.h>
@@ -166,4 +167,11 @@ void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn,
   }
   google::protobuf::Message* response =
       service->GetResponsePrototype(method).New();
+
+  //给下面的method方法的调用，绑定一个回调函数closure done 给CallMethod
+  //google::protobuf::NewCallback(); 
+  
+  //在框架上根据远端rpc请求，调用当前rpc节点上发布的方法
+  //实现：new UserService().login(controller, request, )
+  service->CallMethod(method, nullptr, request, response,nullptr); 
 }
