@@ -162,16 +162,24 @@ void RpcProvider::OnMessage(const muduo::net::TcpConnectionPtr& conn,
   //但是还要生成方法调用的请求和响应参数从argsStr
   google::protobuf::Message* request =
       service->GetRequestPrototype(method).New();
-  if (request->ParseFromString(argsStr)) {
+  if (!request->ParseFromString(argsStr)) {
     std::cout << "request parse error! content: " << argsStr << std::endl;
   }
   google::protobuf::Message* response =
       service->GetResponsePrototype(method).New();
 
   //给下面的method方法的调用，绑定一个回调函数closure done 给CallMethod
-  //google::protobuf::NewCallback(); 
-  
+  google::protobuf::Closure* done =
+      google::protobuf::NewCallback<RpcProvider,
+                                    const muduo::net::TcpConnectionPtr&,
+                                    google::protobuf::Message*>(
+          this, &RpcProvider::SendRpcResponse, conn, response);
+
   //在框架上根据远端rpc请求，调用当前rpc节点上发布的方法
   //实现：new UserService().login(controller, request, )
-  service->CallMethod(method, nullptr, request, response,nullptr); 
+  service->CallMethod(method, nullptr, request, response, done);
 }
+
+// Closure的回调操作，用于序列化rpc的response和网络发送
+void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr&,
+                                  google::protobuf::Message* res) {}
