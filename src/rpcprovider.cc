@@ -189,6 +189,7 @@ void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr& conn,
     conn->send(responseStr);
   } else {
     std::cout << "Serialize Response error! " << std::endl;
+    return; 
   }
   conn->shutdown();  //模拟http的短链接服务，由rpcprovider主动断开链接
 }
