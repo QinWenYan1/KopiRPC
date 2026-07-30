@@ -187,6 +187,8 @@ void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr& conn,
   // response进行序列化，序列化成功后，通过网络把rpc方法执行的结果发送回rpc调用方
   if (res->SerializeToString(&responseStr)) {
     conn->send(responseStr);
-    conn->shutdown(); //模拟http的短链接服务，由rpcprovider主动断开链接
+  } else {
+    std::cout << "Serialize Response error! " << std::endl;
   }
+  conn->shutdown();  //模拟http的短链接服务，由rpcprovider主动断开链接
 }
