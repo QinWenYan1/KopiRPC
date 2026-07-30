@@ -1,5 +1,6 @@
 #pragma once
 #include <google/protobuf/descriptor.h>
+#include <google/protobuf/message.h>
 #include <google/protobuf/service.h>
 #include <muduo/base/Timestamp.h>
 #include <muduo/net/Buffer.h>
@@ -47,8 +48,11 @@ class RpcProvider {
   std::unordered_map<std::string, ServiceInfo> serviceMap;
 
   // TCP 连接建立/断开时的回调(注册给 TcpServer,由 muduo 触发)
-  void onConnection(const muduo::net::TcpConnectionPtr&);
+  void OnConnection(const muduo::net::TcpConnectionPtr&);
   // 连接上有数据可读时的回调(注册给 TcpServer,由 muduo 触发)
-  void onMessage(const muduo::net::TcpConnectionPtr&, muduo::net::Buffer*,
+  void OnMessage(const muduo::net::TcpConnectionPtr&, muduo::net::Buffer*,
                  muduo::Timestamp);
+  // Closure的回调操作，用于序列化rpc的response和网络发送
+  void SendRpcResponse(const muduo::net::TcpConnectionPtr&,
+                       google::protobuf::Message*);
 };

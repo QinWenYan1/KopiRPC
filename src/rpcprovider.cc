@@ -65,12 +65,12 @@ void RpcProvider::Run() {
   muduo::net::TcpServer server(&eventLoop, address, "RPCProvider");
   server.setConnectionCallback(
       [this](const muduo::net::TcpConnectionPtr& conn) {
-        this->onConnection(conn);
+        this->OnConnection(conn);
       });
 
   server.setMessageCallback(
       [this](const muduo::net::TcpConnectionPtr& conn, muduo::net::Buffer* buf,
-             muduo::Timestamp t) { this->onMessage(conn, buf, t); });
+             muduo::Timestamp t) { this->OnMessage(conn, buf, t); });
 
   // 设置 muduo 的 IO 线程数(多 Reactor 线程池大小)
   server.setThreadNum(4);
@@ -84,7 +84,7 @@ void RpcProvider::Run() {
 }
 
 // 连接建立/断开时触发
-void RpcProvider::onConnection(const muduo::net::TcpConnectionPtr& conn) {
+void RpcProvider::OnConnection(const muduo::net::TcpConnectionPtr& conn) {
   if (!conn->connected()) {
     // 和 rpc client 的连接断开了
     conn->shutdown();
@@ -100,7 +100,7 @@ void RpcProvider::onConnection(const muduo::net::TcpConnectionPtr& conn) {
  */
 
 // 连接上有数据可读时触发: 解析一帧 RPC 请求
-void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn,
+void RpcProvider::OnMessage(const muduo::net::TcpConnectionPtr& conn,
                             muduo::net::Buffer* buf, muduo::Timestamp t) {
   // 取出本次收到的全部字节(粘包时可能不止一帧,当前按一帧解析)
   std::string recvBuf = buf->retrieveAllAsString();
