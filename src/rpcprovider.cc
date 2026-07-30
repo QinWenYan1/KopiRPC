@@ -1,6 +1,7 @@
 #include "rpcprovider.h"
 
 #include <google/protobuf/descriptor.h>
+#include <google/protobuf/service.h>
 #include <muduo/net/Callbacks.h>
 #include <muduo/net/InetAddress.h>
 #include <muduo/net/TcpServer.h>
@@ -137,10 +138,23 @@ void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn,
   std::cout << "==============================================" << std::endl;
 
   //获取service对象和method对象
-  auto item = serviceMap.find(serviceName); 
-  if (item == serviceMap.end()){
-    std::cout << serviceName << " is not existed!" << std::endl; 
+  auto item = serviceMap.find(serviceName);
+  if (item == serviceMap.end()) {
+    std::cout << serviceName << " is not existed!" << std::endl;
+    return;
+  }
+
+  auto servInfo = item->second;
+  //对应要调用的user service，获取service对象 UserService
+  google::protobuf::Service* service = servInfo.serv;
+  auto itemMethod = servInfo.methodMap.find(methodName);
+  if (itemMethod == servInfo.methodMap.end()) {
+    std::cout << serviceName << "'s " << methodName << " is not existed! "
+              << std::endl;
     return; 
   }
-  
+
+  //对应要调用的method 
+  const google::protobuf::MethodDescriptor* method = itemMethod->second;  
+
 }
