@@ -102,5 +102,5 @@ void KopiRpcChannel::CallMethod(
     return; 
   }
 
-  std::string responseStr();
+  std::string responseStr(recvBuf,0,recvSize);
 }
