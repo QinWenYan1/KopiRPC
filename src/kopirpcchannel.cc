@@ -5,10 +5,13 @@
 #include <google/protobuf/service.h>
 #include <cstring>
 
+#include "KopirpcApplication.h"
 #include "rpcheader.pb.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
+#include <netinet/in.h>
+
 /*
  * 数据格式：
  *   [header size ][service name][method name][args size] | [argsStr]
@@ -51,7 +54,7 @@ void KopiRpcChannel::CallMethod(
   //组织等待发送的字符串 
   std::string sendRpcStr; 
   //放header size
-  std::memcpy(&sendRpcStr, &headerSize, sizeof(headerSize)); 
+  sendRpcStr.append(reinterpret_cast<char*>(&headerSize), sizeof(headerSize));
   sendRpcStr += rpcHeaderStr; //放header
   sendRpcStr += argsStr; //放args Str
 
@@ -70,5 +73,12 @@ void KopiRpcChannel::CallMethod(
     std::cout << "create socket error! errno: " << errno << std::endl; 
     exit(EXIT_FAILURE);
   }
+
+  std::string ip = KopirpcApplication::GetInstance().GetConfigFile().Load("rpcserverip"); 
+  uint16_t port = atoi(KopirpcApplication::GetInstance().GetConfigFile().Load("rpcserverport").c_str()); 
+
+  sockaddr_in serverAddr; 
+  serverAddr.sin_family=AF_INET; 
+  serverAddr.sin_port = htons(port); 
 
 }
