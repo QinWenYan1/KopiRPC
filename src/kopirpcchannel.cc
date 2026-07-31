@@ -103,4 +103,8 @@ void KopiRpcChannel::CallMethod(
   }
 
   std::string responseStr(recvBuf,0,recvSize);
+  if(response->ParseFromString(responseStr)){
+    std::cout << "parse error! response string: " << responseStr << std::endl; 
+    return; 
+  }
 }
