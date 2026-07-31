@@ -1,17 +1,19 @@
 #include "kopirpcchannel.h"
 
+#include <arpa/inet.h>
+#include <errno.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/message.h>
 #include <google/protobuf/service.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <cstring>
 
 #include "KopirpcApplication.h"
 #include "rpcheader.pb.h"
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <errno.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
 /*
  * 数据格式：
@@ -49,15 +51,15 @@ void KopiRpcChannel::CallMethod(
     headerSize = rpcHeaderStr.size();
   } else {
     std::cout << "seralize rpc header error!" << std::endl;
-    return; 
+    return;
   }
 
-  //组织等待发送的字符串 
-  std::string sendRpcStr; 
+  //组织等待发送的字符串
+  std::string sendRpcStr;
   //放header size
   sendRpcStr.append(reinterpret_cast<char*>(&headerSize), sizeof(headerSize));
-  sendRpcStr += rpcHeaderStr; //放header
-  sendRpcStr += argsStr; //放args Str
+  sendRpcStr += rpcHeaderStr;  //放header
+  sendRpcStr += argsStr;       //放args Str
 
   // 打印调试信息
   std::cout << "==============================================" << std::endl;
@@ -69,42 +71,53 @@ void KopiRpcChannel::CallMethod(
   std::cout << "==============================================" << std::endl;
 
   //使用tcp编程发送字符流，完成rpc的远程调用
-  int clientfd = socket(AF_INET, SOCK_STREAM,0); 
-  if  (clientfd == -1){
-    std::cout << "create socket error! errno: " << errno << std::endl; 
+  int clientfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (clientfd == -1) {
+    std::cout << "create socket error! errno: " << errno << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  std::string ip = KopirpcApplication::GetInstance().GetConfigFile().Load("rpcserverip"); 
-  uint16_t port = atoi(KopirpcApplication::GetInstance().GetConfigFile().Load("rpcserverport").c_str()); 
+  std::string ip =
+      KopirpcApplication::GetInstance().GetConfigFile().Load("rpcserverip");
+  uint16_t port = atoi(KopirpcApplication::GetInstance()
+                           .GetConfigFile()
+                           .Load("rpcserverport")
+                           .c_str());
 
-  sockaddr_in serverAddr; 
-  serverAddr.sin_family=AF_INET; 
-  serverAddr.sin_port = htons(port); 
-  serverAddr.sin_addr.s_addr = inet_addr(ip.c_str()); 
+  sockaddr_in serverAddr;
+  serverAddr.sin_family = AF_INET;
+  serverAddr.sin_port = htons(port);
+  serverAddr.sin_addr.s_addr = inet_addr(ip.c_str());
 
-  //rpc链接启动
-  if(connect(clientfd, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) == -1){
-    std::cout << "connection error! errno: " << errno << std::endl; 
+  // rpc链接启动
+  if (connect(clientfd, reinterpret_cast<sockaddr*>(&serverAddr),
+              sizeof(serverAddr)) == -1) {
+    std::cout << "connection error! errno: " << errno << std::endl;
+    close(clientfd);
     exit(EXIT_FAILURE);
   }
 
-  if (send(clientfd, sendRpcStr.c_str(), sendRpcStr.size(),0) == -1){
-    std::cout << "send error! errno: " << errno << std::endl; 
-    return; 
+  //发送rpc请求
+  if (send(clientfd, sendRpcStr.c_str(), sendRpcStr.size(), 0) == -1) {
+    std::cout << "send error! errno: " << errno << std::endl;
+    close(clientfd);
+    return;
   }
 
   // 接受rpc请求的响应值
-  char recvBuf[1024] = {0}; 
-  int recvSize = 0; 
-  if (recv(clientfd,recvBuf,1024,0) == -1){
-    std::cout << "recv error! errno: " << errno << std::endl; 
-    return; 
+  char recvBuf[1024] = {0};
+  int recvSize = 0;
+  if (recv(clientfd, recvBuf, 1024, 0) == -1) {
+    std::cout << "recv error! errno: " << errno << std::endl;
+    close(clientfd);
+    return;
   }
 
-  std::string responseStr(recvBuf,0,recvSize);
-  if(response->ParseFromString(responseStr)){
-    std::cout << "parse error! response string: " << responseStr << std::endl; 
-    return; 
+  //反序列化rpc调用的响应数据
+  std::string responseStr(recvBuf, 0, recvSize);
+  if (!response->ParseFromString(responseStr)) {
+    std::cout << "parse error! response string: " << responseStr << std::endl;
+    close(clientfd);
+    return;
   }
 }
