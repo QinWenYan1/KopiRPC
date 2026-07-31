@@ -83,9 +83,14 @@ void KopiRpcChannel::CallMethod(
   serverAddr.sin_port = htons(port); 
   serverAddr.sin_addr.s_addr = inet_addr(ip.c_str()); 
 
+  //rpc链接启动
   if(connect(clientfd, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) == -1){
     std::cout << "connection error! errno: " << errno << std::endl; 
     exit(EXIT_FAILURE);
+  }
+
+  if (send(clientfd, sendRpcStr.c_str(), sendRpcStr.size(),0) == -1){
+    std::cout << "send error! errno: " << errno << std::endl; 
   }
 
 }
