@@ -101,5 +101,6 @@ void KopiRpcChannel::CallMethod(
     std::cout << "recv error! errno: " << errno << std::endl; 
     return; 
   }
-  
+
+  std::string responseStr();
 }
