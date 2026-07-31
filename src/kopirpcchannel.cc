@@ -11,6 +11,7 @@
 #include <sys/socket.h>
 #include <errno.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 /*
  * 数据格式：
@@ -80,5 +81,6 @@ void KopiRpcChannel::CallMethod(
   sockaddr_in serverAddr; 
   serverAddr.sin_family=AF_INET; 
   serverAddr.sin_port = htons(port); 
+  serverAddr.sin_addr.s_addr = inet_addr(ip.c_str()); 
 
 }
