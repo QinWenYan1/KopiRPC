@@ -3,6 +3,7 @@
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/message.h>
 #include <google/protobuf/service.h>
+#include <cstring>
 
 #include "rpcheader.pb.h"
 
@@ -46,4 +47,21 @@ void KopiRpcChannel::CallMethod(
   }
 
   //组织等待发送的字符串 
+  std::string sendRpcStr; 
+  //放header size
+  std::memcpy(&sendRpcStr, &headerSize, sizeof(headerSize)); 
+  sendRpcStr += rpcHeaderStr; //放header
+  sendRpcStr += argsStr; //放args Str
+
+  // 打印调试信息
+  std::cout << "==============================================" << std::endl;
+  std::cout << "header size: " << headerSize << std::endl;
+  std::cout << "rpc header content: " << rpcHeaderStr << std::endl;
+  std::cout << "service name: " << serviceName << std::endl;
+  std::cout << "method name: " << methodName << std::endl;
+  std::cout << "args str: " << argsStr << std::endl;
+  std::cout << "==============================================" << std::endl;
+
+  //使用tcp编程发送字符流
+  
 }
