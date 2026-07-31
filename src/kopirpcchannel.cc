@@ -91,6 +91,10 @@ void KopiRpcChannel::CallMethod(
 
   if (send(clientfd, sendRpcStr.c_str(), sendRpcStr.size(),0) == -1){
     std::cout << "send error! errno: " << errno << std::endl; 
+    return; 
   }
+
+  // 接受rpc请求的响应值
+  
 
 }
