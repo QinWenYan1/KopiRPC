@@ -95,6 +95,11 @@ void KopiRpcChannel::CallMethod(
   }
 
   // 接受rpc请求的响应值
+  char recvBuf[1024] = {0}; 
+  int recvSize = 0; 
+  if (recv(clientfd,recvBuf,1024,0) == -1){
+    std::cout << "recv error! errno: " << errno << std::endl; 
+    return; 
+  }
   
-
 }
