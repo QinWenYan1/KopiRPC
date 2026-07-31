@@ -6,7 +6,9 @@
 #include <cstring>
 
 #include "rpcheader.pb.h"
-
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <errno.h>
 /*
  * 数据格式：
  *   [header size ][service name][method name][args size] | [argsStr]
@@ -62,6 +64,11 @@ void KopiRpcChannel::CallMethod(
   std::cout << "args str: " << argsStr << std::endl;
   std::cout << "==============================================" << std::endl;
 
-  //使用tcp编程发送字符流
-  
+  //使用tcp编程发送字符流，完成rpc的远程调用
+  int clientfd = socket(AF_INET, SOCK_STREAM,0); 
+  if  (clientfd == -1){
+    std::cout << "create socket error! errno: " << errno << std::endl; 
+    exit(EXIT_FAILURE);
+  }
+
 }
