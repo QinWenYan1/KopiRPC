@@ -23,8 +23,7 @@ class FriendService : public fixbug::FriendServiceRpc {
                      const ::fixbug::GetFriendListRequest* req,
                      ::fixbug::GetFriendListResponse* res,
                      ::google::protobuf::Closure* done) {
-    uint32_t userid = req->userid(); 
-    std::vector<std::string> friendList = GetFriendList(userid); 
-
-                     }
+    uint32_t userid = req->userid();
+    std::vector<std::string> friendList = GetFriendList(userid);
+  }
 };
