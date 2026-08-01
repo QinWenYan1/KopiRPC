@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
   // rpc方法的响应
   fixbug::GetFriendListResponse resp;
   //发起rpc方法的调用，同步rpc调用过程，Login底层调用Kopirpcchannel::callmethod
-  //同步阻塞的方式调用
+  //同步阻塞的方式调用：client 发送请求并等待response
   stub.GetFriendList(nullptr, &request, &resp, nullptr);  //跑到channel里面执行
 
   //一次rpc调用完成，读调用结果
