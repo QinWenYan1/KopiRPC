@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "Kopirpcapplication.h"
+#include "kopirpcapplication.h"
 #include "kopirpcchannel.h"
 #include "user.pb.h"
 
