@@ -89,7 +89,7 @@ void KopiRpcChannel::CallMethod(
   serverAddr.sin_port = htons(port);
   serverAddr.sin_addr.s_addr = inet_addr(ip.c_str());
 
-  // rpc链接启动
+  // rpc服务节点链接启动
   if (connect(clientfd, reinterpret_cast<sockaddr*>(&serverAddr),
               sizeof(serverAddr)) == -1) {
     std::cout << "connection error! errno: " << errno << std::endl;
@@ -113,6 +113,8 @@ void KopiRpcChannel::CallMethod(
     }
     if (n == -1) {
         std::cout << "reciving error! " << errno << std::endl;
+        close(clientfd);
+        return; 
     }
 
   //反序列化rpc调用的响应数据
@@ -122,5 +124,5 @@ void KopiRpcChannel::CallMethod(
     return;
   }
   close(clientfd);
-  
+
 }
