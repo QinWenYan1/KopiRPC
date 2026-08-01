@@ -1,5 +1,7 @@
 #pragma once /*防止头文件被包含多次*/
 #include "kopirpcconfig.h"
+#include "kopirpcchannel.h"
+#include "kopirpccontroller.h"
 
 // KopirpcApplication —— 框架基础类(单例)
 //

@@ -4,7 +4,7 @@
 
 #include <string>
 
-class KopirpcController {
+class KopirpcController : public google::protobuf::RpcController{
  public:
   KopirpcController();
   void Reset();
@@ -15,7 +15,7 @@ class KopirpcController {
 
   //目前不需要去实现的功能
   void StartCancel();
-  bool IsCandeled() const;
+  bool IsCanceled() const;
   void NotifyOnCancel(google::protobuf::Closure* callback);
 
  private:

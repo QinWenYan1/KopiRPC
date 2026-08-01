@@ -2,7 +2,7 @@
 
 #include "friend.pb.h"
 #include "kopirpcapplication.h"
-#include "kopirpcchannel.h"
+#include "kopirpccontroller.h"
 
 /*
  * example属于是业务代码，包括caller + callee
@@ -29,7 +29,8 @@ int main(int argc, char* argv[]) {
   //同步阻塞的方式调用：client 发送请求并等待response
   //但问题是如果callmethod中出错，我们还有必要读response吗？
   //这个时候controller便有用了，它能携带调用过程中的状态信息
-  stub.GetFriendList(nullptr, &request, &resp, nullptr);  //跑到channel里面执行
+  KopirpcController controller; 
+  stub.GetFriendList(&controller, &request, &resp, nullptr);  //跑到channel里面执行
 
   //一次rpc调用完成，读调用结果
   if (resp.result().errcode() == 0) {
