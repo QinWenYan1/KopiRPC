@@ -10,6 +10,7 @@ class KopirpcController {
   void Reset();
   bool Failed() const;
   std::string ErrorText() const;
+  //当出现错误的时候设置，一起将error text也一起设置
   void SetFailed(const std::string& reason);
 
   //目前不需要去实现的功能
@@ -18,6 +19,6 @@ class KopirpcController {
   void NotifyOnCancel(google::protobuf::Closure* callback);
 
  private:
-    bool m_failed; //RPC方法执行过程中的状态
-    std::string m_errText; //RPC方法执行过程中的错误信息
+  bool isFailed;          // RPC方法执行过程中的状态
+  std::string errText;  // RPC方法执行过程中的错误信息
 };
