@@ -18,6 +18,13 @@ class UserService
     return true;
   }
 
+  bool Register(uint32_t id, std::string name, std::string pwd) {
+    std::cout << "Doing the local service: register..." << std::endl;
+    std::cout << "id: " << id << " name: " << name << " pwd: " << pwd
+              << std::endl;
+    return true;
+  }
+
   // RPC 入口: 重写基类虚函数,框架收到远程 Login 请求后派发到这里
   //   调用链: caller 发 LoginRequest -> muduo 网络 -> 框架反序列化 -> 本函数
   //   四个参数的签名由 protobuf 生成的基类固定,业务层只管用不用改
@@ -40,6 +47,17 @@ class UserService
 
     // 4. done->Run() 通知框架收尾: 由框架把 response 序列化并发回 caller
     done->Run();
+  }
+
+  void Register(google::protobuf::RpcController* controller,
+                const ::fixbug::RegisterRequest* req, ::fixbug::RegisterResponse* res,
+                ::google::protobuf::Closure* done) override {
+    uint32_t id = req->id(); 
+    std::string name = req->name(); 
+    std::string pwd = req->pwd(); 
+
+    bool ret = Register(id, name, pwd);
+    
   }
 };
 
