@@ -38,5 +38,23 @@ int main(int argc, char* argv[]) {
               << std::endl;
   }
 
+  //演示调用远程发布的rpc方法Register
+  fixbug::RegisterRequest req;
+  req.set_id(2000);
+  req.set_name("Kopi");
+  req.set_pwd("88888888");
+  fixbug::RegisterResponse res;
+
+  //以同步的方式，发起rpc调用请求，等待返回结果
+  stub.Register(nullptr, &req, &res, nullptr);
+
+  //一次rpc调用完成，读调用结果
+  if (resp.result().errcode() == 0) {
+    std::cout << "rpc Register response: " << resp.success() << std::endl;
+  } else {
+    std::cout << "rpc Register response error: " << resp.result().errmsg()
+              << std::endl;
+  }
+
   return 0;
 }
