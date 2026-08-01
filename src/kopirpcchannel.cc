@@ -12,7 +12,7 @@
 
 #include <cstring>
 
-#include "KopirpcApplication.h"
+#include "kopirpcApplication.h"
 #include "rpcheader.pb.h"
 
 /*
@@ -104,20 +104,23 @@ void KopiRpcChannel::CallMethod(
     return;
   }
 
-  // 接受rpc请求的响应值
-  char recvBuf[1024] = {0};
-  int recvSize = 0;
-  if (recv(clientfd, recvBuf, 1024, 0) == -1) {
-    std::cout << "recv error! errno: " << errno << std::endl;
-    close(clientfd);
-    return;
-  }
+  // 循环接收,直到对端关闭连接(recv 返回 0)
+    std::string responseStr;
+    char buf[1024];
+    ssize_t n = 0;
+    while ((n = recv(clientfd, buf, sizeof(buf), 0)) > 0) {
+        responseStr.append(buf, n);
+    }
+    if (n == -1) {
+        std::cout << "reciving error! " << errno << std::endl;
+    }
 
   //反序列化rpc调用的响应数据
-  std::string responseStr(recvBuf, 0, recvSize);
   if (!response->ParseFromString(responseStr)) {
     std::cout << "parse error! response string: " << responseStr << std::endl;
     close(clientfd);
     return;
   }
+  close(clientfd);
+  
 }
