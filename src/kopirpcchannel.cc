@@ -105,17 +105,17 @@ void KopiRpcChannel::CallMethod(
   }
 
   // 循环接收,直到对端关闭连接(recv 返回 0)
-    std::string responseStr;
-    char buf[1024];
-    ssize_t n = 0;
-    while ((n = recv(clientfd, buf, sizeof(buf), 0)) > 0) {
-        responseStr.append(buf, n);
-    }
-    if (n == -1) {
-        std::cout << "reciving error! " << errno << std::endl;
-        close(clientfd);
-        return; 
-    }
+  std::string responseStr;
+  char buf[1024];
+  ssize_t n = 0;
+  while ((n = recv(clientfd, buf, sizeof(buf), 0)) > 0) {
+    responseStr.append(buf, n);
+  }
+  if (n == -1) {
+    std::cout << "reciving error! " << errno << std::endl;
+    close(clientfd);
+    return;
+  }
 
   //反序列化rpc调用的响应数据
   if (!response->ParseFromString(responseStr)) {
@@ -124,5 +124,4 @@ void KopiRpcChannel::CallMethod(
     return;
   }
   close(clientfd);
-
 }
