@@ -27,6 +27,8 @@ int main(int argc, char* argv[]) {
   fixbug::GetFriendListResponse resp;
   //发起rpc方法的调用，同步rpc调用过程，Login底层调用Kopirpcchannel::callmethod
   //同步阻塞的方式调用：client 发送请求并等待response
+  //但问题是如果callmethod中出错，我们还有必要读response吗？
+  //这个时候controller便有用了，它能携带调用过程中的状态信息
   stub.GetFriendList(nullptr, &request, &resp, nullptr);  //跑到channel里面执行
 
   //一次rpc调用完成，读调用结果
