@@ -109,7 +109,7 @@ void KopiRpcChannel::CallMethod(
   char buf[1024];
   ssize_t n = 0;
   while ((n = recv(clientfd, buf, sizeof(buf), 0)) > 0) {
-    responseStr.append(buf, n);
+    responseStr.append(buf, n); //string(buf, n size)引出的一个问题
   }
   if (n == -1) {
     std::cout << "reciving error! " << errno << std::endl;
