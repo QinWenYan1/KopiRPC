@@ -52,12 +52,22 @@ class UserService
   void Register(google::protobuf::RpcController* controller,
                 const ::fixbug::RegisterRequest* req, ::fixbug::RegisterResponse* res,
                 ::google::protobuf::Closure* done) override {
+    
+    // 1. 从请求对象取出参数(框架已完成反序列化)
     uint32_t id = req->id(); 
     std::string name = req->name(); 
     std::string pwd = req->pwd(); 
-
-    bool ret = Register(id, name, pwd);
     
+    // 2. 调用本地业务方法,完成实际逻辑
+    bool ret = Register(id, name, pwd);
+
+    // 3. 填写响应: errcode=0 表示无错误,并带上登录结果
+    res->mutable_result()->set_errcode(0); 
+    res->mutable_result()->set_errmsg(""); 
+    res->set_success(true);
+    
+    // 4. done->Run() 通知框架收尾: 由框架把 response 序列化并发回 caller
+    done->Run();
   }
 };
 
