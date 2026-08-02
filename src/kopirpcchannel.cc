@@ -13,7 +13,7 @@
 #include <cstring>
 #include <string>
 
-#include "kopirpcApplication.h"
+#include "kopirpcapplication.h"
 #include "rpcheader.pb.h"
 
 /*
@@ -120,7 +120,7 @@ void KopiRpcChannel::CallMethod(
   char buf[1024];
   ssize_t n = 0;
   while ((n = recv(clientfd, buf, sizeof(buf), 0)) > 0) {
-    responseStr.append(buf, n);  // string(buf, n size)引出的一个问题
+    responseStr.append(buf, n);  //问题排除： string(buf, n, size)导致的阶段出错
   }
   if (n == -1) {
     std::string errtxt = "receiving error: ";
@@ -131,6 +131,10 @@ void KopiRpcChannel::CallMethod(
   }
 
   //反序列化rpc调用的响应数据
+  /*
+  * 问题排除：ParseFromString为用户态操作，errno是内核态错误搬运，
+  *         ParseFromString的报错不会被记录
+  */
   if (!response->ParseFromString(responseStr)) {
     std::string errtxt = "parse error! response string: ";
     errtxt += responseStr;
