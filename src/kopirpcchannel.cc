@@ -53,7 +53,7 @@ void KopiRpcChannel::CallMethod(
     headerSize = rpcHeaderStr.size();
   } else {
     //如果传入了controller就设置为失败
-    if (controller) controller->SetFailed("seralize rpc header error!");
+    if (controller) controller->SetFailed("serialize rpc header error!");
     return;
   }
 
@@ -106,7 +106,7 @@ void KopiRpcChannel::CallMethod(
 
   //发送rpc请求
   if (send(clientfd, sendRpcStr.c_str(), sendRpcStr.size(), 0) == -1) {
-    std::string errtxt = "end error! errno: ";
+    std::string errtxt = "send error! errno: ";
     errtxt += std::to_string(errno);
     if (controller) controller->SetFailed(errtxt);
     close(clientfd);
@@ -121,7 +121,7 @@ void KopiRpcChannel::CallMethod(
     responseStr.append(buf, n);  // string(buf, n size)引出的一个问题
   }
   if (n == -1) {
-    std::string errtxt = "reciving error: ";
+    std::string errtxt = "receiving error: ";
     errtxt += std::to_string(errno);
     if (controller) controller->SetFailed(errtxt);
     close(clientfd);
@@ -131,7 +131,7 @@ void KopiRpcChannel::CallMethod(
   //反序列化rpc调用的响应数据
   if (!response->ParseFromString(responseStr)) {
     std::string errtxt = "parse error! response string: ";
-    errtxt += std::to_string(errno);
+    errtxt += responseStr;
     if (controller) controller->SetFailed(errtxt);
     close(clientfd);
     return;
