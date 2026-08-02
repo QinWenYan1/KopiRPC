@@ -2,7 +2,6 @@
 
 #include "friend.pb.h"
 #include "kopirpcapplication.h"
-#include "kopirpccontroller.h"
 
 /*
  * example属于是业务代码，包括caller + callee

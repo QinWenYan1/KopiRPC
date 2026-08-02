@@ -11,6 +11,7 @@
 #include <unistd.h>
 
 #include <cstring>
+#include <string>
 
 #include "kopirpcApplication.h"
 #include "rpcheader.pb.h"
@@ -76,7 +77,7 @@ void KopiRpcChannel::CallMethod(
   int clientfd = socket(AF_INET, SOCK_STREAM, 0);
   if (clientfd == -1) {
     std::string errtxt = "create socket error! errno: ";
-    errtxt += errno;
+    errtxt += std::to_string(errno);
     if (controller) controller->SetFailed(errtxt);
     return;
   }
@@ -97,7 +98,7 @@ void KopiRpcChannel::CallMethod(
   if (connect(clientfd, reinterpret_cast<sockaddr*>(&serverAddr),
               sizeof(serverAddr)) == -1) {
     std::string errtxt = "connection error! errno: ";
-    errtxt += errno;
+    errtxt += std::to_string(errno);
     if (controller) controller->SetFailed(errtxt);
     close(clientfd);
     return;
@@ -106,7 +107,7 @@ void KopiRpcChannel::CallMethod(
   //发送rpc请求
   if (send(clientfd, sendRpcStr.c_str(), sendRpcStr.size(), 0) == -1) {
     std::string errtxt = "end error! errno: ";
-    errtxt += errno;
+    errtxt += std::to_string(errno);
     if (controller) controller->SetFailed(errtxt);
     close(clientfd);
     return;
@@ -121,7 +122,7 @@ void KopiRpcChannel::CallMethod(
   }
   if (n == -1) {
     std::string errtxt = "reciving error: ";
-    errtxt += errno;
+    errtxt += std::to_string(errno);
     if (controller) controller->SetFailed(errtxt);
     close(clientfd);
     return;
@@ -130,7 +131,7 @@ void KopiRpcChannel::CallMethod(
   //反序列化rpc调用的响应数据
   if (!response->ParseFromString(responseStr)) {
     std::string errtxt = "parse error! response string: ";
-    errtxt += errno;
+    errtxt += std::to_string(errno);
     if (controller) controller->SetFailed(errtxt);
     close(clientfd);
     return;

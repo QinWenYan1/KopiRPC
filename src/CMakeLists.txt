@@ -4,6 +4,7 @@ set(SRC_LIST
     kopirpcapplication.cc kopirpcchannel.cc 
     kopirpcconfig.cc rpcheader.pb.cc 
     rpcprovider.cc
+    kopirpccontroller.cc
     )
 #静态库
 add_library(KopiRPC ${SRC_LIST}) 
