@@ -30,6 +30,8 @@ void KopiRpcChannel::CallMethod(
   std::string serviceName = sd->name();
   std::string methodName = method->name();
 
+  if (!controller) std::cout << "Warning: No controller assigned" << std::endl;
+
   //获取参数的序列化字符串长度
   std::string argsStr;
   int argsSize = 0;
