@@ -35,7 +35,8 @@ void KopiRpcChannel::CallMethod(
   if (request->SerializeToString(&argsStr)) {
     argsSize = argsStr.size();
   } else {
-    controller->SetFailed("serialize request error!"); 
+    //如果传入了controller就设置为失败
+    if (controller) controller->SetFailed("serialize request error!"); 
     return;
   }
 
