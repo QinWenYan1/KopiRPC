@@ -75,10 +75,10 @@ void KopiRpcChannel::CallMethod(
   //使用tcp编程发送字符流，完成rpc的远程调用
   int clientfd = socket(AF_INET, SOCK_STREAM, 0);
   if (clientfd == -1) {
-    std::string errtxt = "create socket error! errno: "; 
-    errtxt += errno; 
+    std::string errtxt = "create socket error! errno: ";
+    errtxt += errno;
     if (controller) controller->SetFailed(errtxt);
-    return; 
+    return;
   }
 
   std::string ip =
@@ -96,14 +96,18 @@ void KopiRpcChannel::CallMethod(
   // rpc服务节点链接启动
   if (connect(clientfd, reinterpret_cast<sockaddr*>(&serverAddr),
               sizeof(serverAddr)) == -1) {
-    std::cout << "connection error! errno: " << errno << std::endl;
+    std::string errtxt = "connection error! errno: ";
+    errtxt += errno;
+    if (controller) controller->SetFailed(errtxt);
     close(clientfd);
-    return; 
+    return;
   }
 
   //发送rpc请求
   if (send(clientfd, sendRpcStr.c_str(), sendRpcStr.size(), 0) == -1) {
-    std::cout << "send error! errno: " << errno << std::endl;
+    std::string errtxt = "end error! errno: ";
+    errtxt += errno;
+    if (controller) controller->SetFailed(errtxt);
     close(clientfd);
     return;
   }
