@@ -36,7 +36,7 @@ void KopiRpcChannel::CallMethod(
     argsSize = argsStr.size();
   } else {
     //如果传入了controller就设置为失败
-    if (controller) controller->SetFailed("serialize request error!"); 
+    if (controller) controller->SetFailed("serialize request error!");
     return;
   }
 
@@ -51,7 +51,8 @@ void KopiRpcChannel::CallMethod(
   if (rpcHeader.SerializeToString(&rpcHeaderStr)) {
     headerSize = rpcHeaderStr.size();
   } else {
-    std::cout << "seralize rpc header error!" << std::endl;
+    //如果传入了controller就设置为失败
+    if (controller) controller->SetFailed("seralize rpc header error!");
     return;
   }
 
@@ -110,7 +111,7 @@ void KopiRpcChannel::CallMethod(
   char buf[1024];
   ssize_t n = 0;
   while ((n = recv(clientfd, buf, sizeof(buf), 0)) > 0) {
-    responseStr.append(buf, n); //string(buf, n size)引出的一个问题
+    responseStr.append(buf, n);  // string(buf, n size)引出的一个问题
   }
   if (n == -1) {
     std::cout << "reciving error! " << errno << std::endl;
