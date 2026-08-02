@@ -120,14 +120,18 @@ void KopiRpcChannel::CallMethod(
     responseStr.append(buf, n);  // string(buf, n size)引出的一个问题
   }
   if (n == -1) {
-    std::cout << "reciving error! " << errno << std::endl;
+    std::string errtxt = "reciving error: ";
+    errtxt += errno;
+    if (controller) controller->SetFailed(errtxt);
     close(clientfd);
     return;
   }
 
   //反序列化rpc调用的响应数据
   if (!response->ParseFromString(responseStr)) {
-    std::cout << "parse error! response string: " << responseStr << std::endl;
+    std::string errtxt = "parse error! response string: ";
+    errtxt += errno;
+    if (controller) controller->SetFailed(errtxt);
     close(clientfd);
     return;
   }
