@@ -35,7 +35,7 @@ void KopiRpcChannel::CallMethod(
   if (request->SerializeToString(&argsStr)) {
     argsSize = argsStr.size();
   } else {
-    std::cout << "seralize request error!" << std::endl;
+    controller->SetFailed("serialize request error!"); 
     return;
   }
 
