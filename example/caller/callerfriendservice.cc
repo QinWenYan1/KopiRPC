@@ -29,19 +29,25 @@ int main(int argc, char* argv[]) {
   //同步阻塞的方式调用：client 发送请求并等待response
   //但问题是如果callmethod中出错，我们还有必要读response吗？
   //这个时候controller便有用了，它能携带调用过程中的状态信息
-  KopirpcController controller; 
-  stub.GetFriendList(&controller, &request, &resp, nullptr);  //跑到channel里面执行
+  KopirpcController controller;
+  stub.GetFriendList(&controller, &request, &resp,
+                     nullptr);  //跑到channel里面执行
 
   //一次rpc调用完成，读调用结果
-  if (resp.result().errcode() == 0) {
-    std::cout << "Get friend list: " << std::endl;
-
-    for (int i = 0; i != resp.friends_size(); ++i) {
-      std::cout << "Name: " << resp.friends(i) << std::endl;
-    }
+  //检查是否出错通过controller的状态
+  if (controller.Failed()) {
+    std::cout << controller.ErrorText() << std::endl;
   } else {
-    std::cout << "rpc login response error: " << resp.result().errmsg()
-              << std::endl;
+    if (resp.result().errcode() == 0) {
+      std::cout << "Get friend list: " << std::endl;
+
+      for (int i = 0; i != resp.friends_size(); ++i) {
+        std::cout << "Name: " << resp.friends(i) << std::endl;
+      }
+    } else {
+      std::cout << "rpc login response error: " << resp.result().errmsg()
+                << std::endl;
+    }
   }
 
   return 0;
