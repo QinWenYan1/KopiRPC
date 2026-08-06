@@ -20,22 +20,23 @@ Logger::Logger() {
       time_t now = time(nullptr);
       tm* nowTime = localtime(&now);
       std::string fileName = std::to_string(nowTime->tm_year + 1900) + "-" +
-                       std::to_string(nowTime->tm_mon + 1) + "-" +
-                       std::to_string(nowTime->tm_mday) + "-log.txt";
+                             std::to_string(nowTime->tm_mon + 1) + "-" +
+                             std::to_string(nowTime->tm_mday) + "-log.txt";
       FILE* fp = fopen(fileName.c_str(), "a+");
       if (fp == nullptr) {
         std::cout << "logger file: " << fileName << " open error!" << std::endl;
         exit(EXIT_FAILURE);
       }
 
-      std::string msg = logQueue.Pop(); 
+      std::string msg = logQueue.Pop();
 
-      char tmBuf[128] = {0}; 
-      sprintf(tmBuf, "%d%d%d =>", nowTime->tm_hour, nowTime->tm_min, nowTime->tm_sec); 
+      std::string tmBuf = std::to_string(nowTime->tm_hour) + "," +
+                          std::to_string(nowTime->tm_min) + "," +
+                          std::to_string(nowTime->tm_sec) + " => ";
 
-      fputs(msg.c_str(), fp);
-      msg.insert(0, tmBuf); 
-      fclose(fp); 
+      tmBuf.append(msg);
+      fputs(tmBuf.c_str(), fp);
+      fclose(fp);
     }
   });
   //设置分离线程，守护线程
