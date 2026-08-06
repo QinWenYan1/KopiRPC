@@ -18,10 +18,10 @@ Logger::Logger() {
       //获取当前的日期，然后取日志信息，写入相应的日志文件当中，也就是说追加的方式
       time_t now = time(nullptr);
       tm* nowTime = localtime(&now);
-      char fileName[128];
-      sprintf(fileName, "%d-%d-%d-log.txt", nowTime->tm_year + 1900,
-              nowTime->tm_mon + 1, nowTime->tm_mday);
-      FILE* fp = fopen(fileName, "a+");
+      std::string fileName = std::to_string(nowTime->tm_year + 1900) + "-" +
+                       std::to_string(nowTime->tm_mon + 1) + "-" +
+                       std::to_string(nowTime->tm_mday) + "-log.txt";
+      FILE* fp = fopen(fileName.c_str(), "a+");
       if (fp == nullptr) {
         std::cout << "logger file: " << fileName << " open error!" << std::endl;
         exit(EXIT_FAILURE);

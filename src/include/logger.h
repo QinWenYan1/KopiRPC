@@ -23,3 +23,26 @@ private:
     Logger(const Logger&) = delete; 
     Logger(Logger&&) = delete; 
 }; 
+
+
+//定义日志宏给用户更方便的方式去日志写入LOG_INFO()
+#define LOG_INFO(logmsgformat, ...) \
+    do  \
+    {   \
+        Logger &logger = logger::GetInstance();\
+        logger.SetLogLevel(INFO);\
+        char c[1024] = {0}; \
+        snprintf(c,1024,logmsgformat, ##_VA_ARGS_); \
+        logger.Log() \
+    } while({0}); 
+
+
+#define LOG_ERR(logmsgformat, ...) \
+    do  \
+    {   \
+        Logger &logger = logger::GetInstance();\
+        logger.SetLogLevel(ERROR);\
+        char c[1024] = {0}; \
+        snprintf(c,1024,logmsgformat, ##__VA_ARGS__); \
+        logger.Log() \
+    } while({0}); 
