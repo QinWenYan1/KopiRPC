@@ -2,6 +2,7 @@
 
 #include <time.h>
 
+#include <cstdio>
 #include <cstdlib>
 #include <iostream>
 
@@ -27,8 +28,13 @@ Logger::Logger() {
         exit(EXIT_FAILURE);
       }
 
-      std::string msg = logQueue.Pop();
+      std::string msg = logQueue.Pop(); 
+
+      char tmBuf[128] = {0}; 
+      sprintf(tmBuf, "%d%d%d =>", nowTime->tm_hour, nowTime->tm_min, nowTime->tm_sec); 
+
       fputs(msg.c_str(), fp);
+      msg.insert(0, tmBuf); 
       fclose(fp); 
     }
   });
