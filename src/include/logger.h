@@ -19,7 +19,7 @@ private:
     int loglevel; //记录日志级别
     LockQueue<std::string> logQueue; //日志缓冲队列
 
-    Logger() = default; 
+    Logger(); 
     Logger(const Logger&) = delete; 
     Logger(Logger&&) = delete; 
 }; 
