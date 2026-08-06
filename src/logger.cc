@@ -29,6 +29,7 @@ Logger::Logger() {
 
       std::string msg = logQueue.Pop();
       fputs(msg.c_str(), fp);
+      fclose(fp); 
     }
   });
   //设置分离线程，守护线程
