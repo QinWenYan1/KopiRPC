@@ -1,5 +1,10 @@
 #include "logger.h"
 
+#include <time.h>
+
+#include <cstdlib>
+#include <iostream>
+
 //获取日志的单例
 Logger& Logger::GetInstance() {
   static Logger logger;
@@ -10,7 +15,20 @@ Logger& Logger::GetInstance() {
 Logger::Logger() {
   std::thread writeLogTask([&]() {
     for (;;) {
-      //获取当前的日期，然后取日志信息，写入相应的日志文件当中
+      //获取当前的日期，然后取日志信息，写入相应的日志文件当中，也就是说追加的方式
+      time_t now = time(nullptr);
+      tm* nowTime = localtime(&now);
+      char fileName[128];
+      sprintf(fileName, "%d-%d-%d-log.txt", nowTime->tm_year + 1900,
+              nowTime->tm_mon + 1, nowTime->tm_mday);
+      FILE* fp = fopen(fileName, "a+");
+      if (fp == nullptr) {
+        std::cout << "logger file: " << fileName << " open error!" << std::endl;
+        exit(EXIT_FAILURE);
+      }
+
+      std::string msg = logQueue.Pop();
+      fputs(msg.c_str(), fp);
     }
   });
   //设置分离线程，守护线程
