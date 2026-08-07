@@ -35,6 +35,7 @@ Logger::Logger() {
                           std::to_string(nowTime->tm_sec) + " => ";
 
       tmBuf.append(msg);
+      tmBuf.append("\n"); 
       fputs(tmBuf.c_str(), fp);
       fclose(fp);
     }
