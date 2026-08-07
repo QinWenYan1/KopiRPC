@@ -13,9 +13,19 @@ class LockQueue {
         std::lock_guard<std::mutex> lock(mtx); 
         //临界区
         q.push(data); 
-        //锁自动释放
+        //锁自动释放,由于写日志线程只有一个就只需要notify one 
+        conVar.notify_one(); 
     }   
-    T&  Pop(); 
+    T&  Pop(){
+        std::unique_lock<std::mutex> lock(mtx); 
+        while (q.empty()){
+            //日志队列为空，线程进入wait状态
+            conVar.wait(lock); 
+        }
+        T data = q.front(); 
+        q.pop(); 
+        return data; 
+    }
  private:   
     std::queue<T> q; 
     std::mutex mtx; 
