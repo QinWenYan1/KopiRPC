@@ -12,7 +12,6 @@
 #include "muduo/net/EventLoop.h"
 #include "muduo/net/InetAddress.h"
 #include "muduo/net/TcpServer.h"
-#include "logger.h"
 
 // RpcProvider —— 框架提供的 RPC 服务发布器
 //

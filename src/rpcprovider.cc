@@ -16,6 +16,7 @@
 
 #include "kopirpcapplication.h"
 #include "rpcheader.pb.h"
+#include "logger.h"
 
 /*
  * servName对应一个service描述符
@@ -34,7 +35,8 @@ void RpcProvider::NotifyService(google::protobuf::Service* service) {
       service->GetDescriptor();
   std::string servName = serviceDescPtr->name();
   int methodCnt = serviceDescPtr->method_count();
-  std::cout << "Service name: " << servName << std::endl;
+  //std::cout << "Service name: " << servName << std::endl;
+  LOG_INFO("Service name: %s", servName.c_str()); 
 
   // 把每个方法以 方法名 -> 方法描述符 登记进 methodMap
   for (int i = 0; i < methodCnt; ++i) {
@@ -42,7 +44,8 @@ void RpcProvider::NotifyService(google::protobuf::Service* service) {
         serviceDescPtr->method(i);
     std::string methodName = methodDescPtr->name();
     servInfo.methodMap.insert({methodName, methodDescPtr});
-    std::cout << "method name: " << methodName << std::endl;
+    //std::cout << "method name: " << methodName << std::endl;
+    LOG_INFO("Method name: %s", methodName.c_str()); 
   }
 
   // 整个服务以 服务名 -> 服务信息 登记进注册表
