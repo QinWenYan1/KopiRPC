@@ -5,6 +5,7 @@
 #include "friend.pb.h"
 #include "kopirpcapplication.h"
 #include "rpcprovider.h"
+#include "logger.h"
 
 class FriendService : public fixbug::FriendServiceRpc {
  public:
@@ -38,6 +39,8 @@ class FriendService : public fixbug::FriendServiceRpc {
 };
 
 int main(int argc, char* argv[]) {
+  LOG_INFO("first log message!");
+  LOG_ERR("%s:%s:%d", __FILE__, __FUNCTION__, __LINE__);  
   // 框架初始化: 从 -i 指定的配置文件读入本机 IP/端口、ZK 地址等
   //   用法示例: provider -i test.conf
   KopirpcApplication::Init(argc, argv);
