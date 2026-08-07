@@ -30,8 +30,8 @@ Logger::Logger() {
 
       std::string msg = logQueue.Pop();
 
-      std::string tmBuf = std::to_string(nowTime->tm_hour) + "," +
-                          std::to_string(nowTime->tm_min) + "," +
+      std::string tmBuf = std::to_string(nowTime->tm_hour) + ":" +
+                          std::to_string(nowTime->tm_min) + ":" +
                           std::to_string(nowTime->tm_sec) + " => ";
 
       tmBuf.append(msg);
