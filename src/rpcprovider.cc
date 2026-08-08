@@ -80,6 +80,7 @@ void RpcProvider::Run() {
 
   std::cout << "RPC Provider start service at IP: " << ip << " Port: " << port
             << std::endl;
+  LOG_INFO("RPC Provider start service at IP: %s, Port: %d", ip.c_str(), port);
 
   // 启动网络服务,进入事件循环(阻塞,此后一切由回调驱动)
   server.start();

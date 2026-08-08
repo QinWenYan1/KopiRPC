@@ -29,13 +29,16 @@ Logger::Logger() {
       }
 
       std::string msg = logQueue.Pop();
+      //将日志的级别关联上了
+      std::string type = (loglevel == INFO ? "info" : "error");
 
       std::string tmBuf = std::to_string(nowTime->tm_hour) + ":" +
                           std::to_string(nowTime->tm_min) + ":" +
-                          std::to_string(nowTime->tm_sec) + " => ";
+                          std::to_string(nowTime->tm_sec) + " => " + "[" +
+                          type + "]";
 
       tmBuf.append(msg);
-      tmBuf.append("\n"); 
+      tmBuf.append("\n");
       fputs(tmBuf.c_str(), fp);
       fclose(fp);
     }
