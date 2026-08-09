@@ -6,6 +6,7 @@
 #include <string>
 
 #include "kopirpcconfig.h"
+#include "logger.h"
 
 void KopirpcApplication::ShowArgsHelp() {
   std::cout << "format: command -i <configfile>" << std::endl;
@@ -45,10 +46,10 @@ void KopirpcApplication::Init(int argc, char** argv) {
   /*开始加载配置文件(约定配置项见 KopirpcConfig 头文件注释)*/
   config.LoadConfigFile(config_file.c_str());
   // 回显加载结果,启动时便于人工确认配置正确
-  std::cout << "RPC Server ip:" << config.Load("rpcserverip") << std::endl;
-  std::cout << "RPC Server port:" << config.Load("rpcserverport") << std::endl;
-  std::cout << "Zookeeper ip:" << config.Load("zookeeperip") << std::endl;
-  std::cout << "Zookeeper port:" << config.Load("zookeeperport") << std::endl;
+  LOG_INFO("RPC Server ip:%s", config.Load("rpcserverip").c_str());
+  LOG_INFO("RPC Server port:%s", config.Load("rpcserverport").c_str());
+  LOG_INFO("Zookeeper ip:%s", config.Load("zookeeperip").c_str());
+  LOG_INFO("Zookeeper port:%s", config.Load("zookeeperport").c_str());
 }
 
 // 函数内静态对象: 首次调用时构造,之后永远返回同一实例(C++11 起构造线程安全)

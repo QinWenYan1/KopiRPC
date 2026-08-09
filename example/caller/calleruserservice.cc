@@ -49,10 +49,10 @@ int main(int argc, char* argv[]) {
   stub.Register(nullptr, &req, &res, nullptr);
 
   //一次rpc调用完成，读调用结果
-  if (resp.result().errcode() == 0) {
-    std::cout << "rpc Register response: " << resp.success() << std::endl;
+  if (res.result().errcode() == 0) {
+    std::cout << "rpc Register response: " << res.success() << std::endl;
   } else {
-    std::cout << "rpc Register response error: " << resp.result().errmsg()
+    std::cout << "rpc Register response error: " << res.result().errmsg()
               << std::endl;
   }
 

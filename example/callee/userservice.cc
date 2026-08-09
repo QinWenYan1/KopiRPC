@@ -3,6 +3,7 @@
 #include <string>
 
 #include "kopirpcapplication.h"
+#include "logger.h"
 #include "rpcprovider.h"
 #include "user.pb.h"
 
@@ -13,15 +14,14 @@ class UserService
  public:
   // 本地业务方法: 真正的登录逻辑(教学演示: 打印参数并恒返回 true)
   bool Login(std::string name, std::string pwd) {
-    std::cout << "Doing the local service: login..." << std::endl;
-    std::cout << "Name: " << name << " pwd: " << pwd << std::endl;
+    LOG_INFO("Doing the local service: login...");
+    LOG_INFO("Name: %s pwd: %s", name.c_str(), pwd.c_str());
     return true;
   }
 
   bool Register(uint32_t id, std::string name, std::string pwd) {
-    std::cout << "Doing the local service: register..." << std::endl;
-    std::cout << "id: " << id << " name: " << name << " pwd: " << pwd
-              << std::endl;
+    LOG_INFO("Doing the local service: register...");
+    LOG_INFO("id: %u name: %s pwd: %s", id, name.c_str(), pwd.c_str());
     return true;
   }
 

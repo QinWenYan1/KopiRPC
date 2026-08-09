@@ -14,6 +14,7 @@
 #include <string>
 
 #include "kopirpcapplication.h"
+#include "logger.h"
 #include "rpcheader.pb.h"
 
 /*
@@ -29,8 +30,6 @@ void KopiRpcChannel::CallMethod(
   const google::protobuf::ServiceDescriptor* sd = method->service();
   std::string serviceName = sd->name();
   std::string methodName = method->name();
-
-  if (!controller) std::cout << "Warning: No controller assigned" << std::endl;
 
   //获取参数的序列化字符串长度
   std::string argsStr;
@@ -66,14 +65,9 @@ void KopiRpcChannel::CallMethod(
   sendRpcStr += rpcHeaderStr;  //放header
   sendRpcStr += argsStr;       //放args Str
 
-  // 打印调试信息
-  std::cout << "==============================================" << std::endl;
-  std::cout << "header size: " << headerSize << std::endl;
-  std::cout << "rpc header content: " << rpcHeaderStr << std::endl;
-  std::cout << "service name: " << serviceName << std::endl;
-  std::cout << "method name: " << methodName << std::endl;
-  std::cout << "args str: " << argsStr << std::endl;
-  std::cout << "==============================================" << std::endl;
+  // 打印调试信息(rpcHeaderStr/argsStr 是 protobuf 二进制字节,只打可读字段)
+  LOG_INFO("header size:%u service:%s method:%s", headerSize,
+           serviceName.c_str(), methodName.c_str());
 
   //使用tcp编程发送字符流，完成rpc的远程调用
   int clientfd = socket(AF_INET, SOCK_STREAM, 0);

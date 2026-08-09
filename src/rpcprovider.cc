@@ -35,8 +35,7 @@ void RpcProvider::NotifyService(google::protobuf::Service* service) {
       service->GetDescriptor();
   std::string servName = serviceDescPtr->name();
   int methodCnt = serviceDescPtr->method_count();
-  //std::cout << "Service name: " << servName << std::endl;
-  LOG_INFO("Service name: %s", servName.c_str()); 
+  LOG_INFO("Service name: %s", servName.c_str());
 
   // 把每个方法以 方法名 -> 方法描述符 登记进 methodMap
   for (int i = 0; i < methodCnt; ++i) {
@@ -44,8 +43,7 @@ void RpcProvider::NotifyService(google::protobuf::Service* service) {
         serviceDescPtr->method(i);
     std::string methodName = methodDescPtr->name();
     servInfo.methodMap.insert({methodName, methodDescPtr});
-    //std::cout << "method name: " << methodName << std::endl;
-    LOG_INFO("Method name: %s", methodName.c_str()); 
+    LOG_INFO("Method name: %s", methodName.c_str());
   }
 
   // 整个服务以 服务名 -> 服务信息 登记进注册表
@@ -78,8 +76,6 @@ void RpcProvider::Run() {
   // 设置 muduo 的 IO 线程数(多 Reactor 线程池大小)
   server.setThreadNum(4);
 
-  std::cout << "RPC Provider start service at IP: " << ip << " Port: " << port
-            << std::endl;
   LOG_INFO("RPC Provider start service at IP: %s, Port: %d", ip.c_str(), port);
 
   // 启动网络服务,进入事件循环(阻塞,此后一切由回调驱动)
@@ -127,26 +123,21 @@ void RpcProvider::OnMessage(const muduo::net::TcpConnectionPtr& conn,
     argsSize = rpcHeader.argssize();
   } else {
     // 请求头损坏,丢弃本次请求
-    std::cout << "rpc Header " << rpcHeaderStr << " parse error" << std::endl;
+    LOG_ERR("rpc Header parse error");
     return;
   }
 
   // 按 argsSize 切出参数段(caller 传来的请求 message 的序列化字节)
   std::string argsStr = recvBuf.substr(headerSize + 4, argsSize);
 
-  // 打印调试信息
-  std::cout << "==============================================" << std::endl;
-  std::cout << "header size: " << headerSize << std::endl;
-  std::cout << "rpc header content: " << rpcHeaderStr << std::endl;
-  std::cout << "service name: " << serviceName << std::endl;
-  std::cout << "method name: " << methodName << std::endl;
-  std::cout << "args str: " << argsStr << std::endl;
-  std::cout << "==============================================" << std::endl;
+  // 打印调试信息(rpcHeaderStr/argsStr 是 protobuf 二进制字节,只打可读字段)
+  LOG_INFO("header size:%u service:%s method:%s", headerSize,
+           serviceName.c_str(), methodName.c_str());
 
   //获取service对象和method对象
   auto item = serviceMap.find(serviceName);
   if (item == serviceMap.end()) {
-    std::cout << serviceName << " is not existed!" << std::endl;
+    LOG_ERR("%s is not existed!", serviceName.c_str());
     return;
   }
 
@@ -155,8 +146,7 @@ void RpcProvider::OnMessage(const muduo::net::TcpConnectionPtr& conn,
   google::protobuf::Service* service = servInfo.serv;
   auto itemMethod = servInfo.methodMap.find(methodName);
   if (itemMethod == servInfo.methodMap.end()) {
-    std::cout << serviceName << "'s " << methodName << " is not existed! "
-              << std::endl;
+    LOG_ERR("%s's %s is not existed!", serviceName.c_str(), methodName.c_str());
     return;
   }
 
@@ -167,7 +157,8 @@ void RpcProvider::OnMessage(const muduo::net::TcpConnectionPtr& conn,
   google::protobuf::Message* request =
       service->GetRequestPrototype(method).New();
   if (!request->ParseFromString(argsStr)) {
-    std::cout << "request parse error! content: " << argsStr << std::endl;
+    LOG_ERR("request parse error!");
+    return;
   }
   google::protobuf::Message* response =
       service->GetResponsePrototype(method).New();
@@ -192,7 +183,7 @@ void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr& conn,
   if (res->SerializeToString(&responseStr)) {
     conn->send(responseStr);
   } else {
-    std::cout << "Serialize Response error!" << std::endl;
+    LOG_ERR("Serialize Response error!");
   }
   conn->shutdown();  //模拟http的短链接服务，由rpcprovider主动断开链接
 }
