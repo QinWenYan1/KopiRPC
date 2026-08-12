@@ -23,7 +23,7 @@ void globalWatcher(zhandle_t* zh, int type, int state, const char* path,
   if (type == ZOO_SESSION_EVENT) {  //回调的消息类型是和会话相关的消息类型
     if (state == ZOO_CONNECTED_STATE) {  // zk client和zkserver链接成功
       //获取信号量
-      sem_t* sem = (sem_t*)zoo_get_context(zh);
+      sem_t* sem = static_cast<sem_t*>(const_cast<void*>(zoo_get_context(zh)));
       //信号量资源+1
       sem_post(sem);
     }
@@ -47,7 +47,7 @@ void ZkClient::Start() {
   mZhandle = zookeeper_init(connStr.c_str(), globalWatcher, 30000, nullptr,
                             nullptr, 0);
   if (!mZhandle) {
-    LOG_INFO("zookeeper_init error!");
+    LOG_ERR("zookeeper_init error!");
     exit(EXIT_FAILURE);
   }
   //创建信号量,等待句柄完成回调
@@ -56,5 +56,6 @@ void ZkClient::Start() {
   zoo_set_context(mZhandle, &sem);
 
   sem_wait(&sem);
+  std::cout << "zookeeper_init success" << std::endl;
   LOG_INFO("zookeeper_init success");
 }
