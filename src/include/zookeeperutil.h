@@ -8,7 +8,7 @@
 //封装的zk客户端类
 class ZkClient {
  public:
-  ZkClient() = default;
+  ZkClient();
   ~ZkClient();
   // zkclient启动链接zkserver
   void Start();
