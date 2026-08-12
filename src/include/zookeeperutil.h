@@ -17,7 +17,8 @@ class ZkClient {
   void Create(const char* path, const char* data, int datalen, int state = 0);
   //根据指定znode
   std::string GetData(const char* path);
-private:
-//zk的客户端句柄，通过句柄来操作zk server
-zhandle_t* mZhandle; 
+
+ private:
+  // zk的客户端句柄，通过句柄来操作zk server
+  zhandle_t* mZhandle;
 };
