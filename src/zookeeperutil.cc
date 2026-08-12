@@ -59,3 +59,7 @@ void ZkClient::Start() {
   std::cout << "zookeeper_init success" << std::endl;
   LOG_INFO("zookeeper_init success");
 }
+
+void ZkClient::Create(const char *path, const char *data, int datalen, int state){
+    std::string pathStr = static_cast<std::string>(path); 
+}
