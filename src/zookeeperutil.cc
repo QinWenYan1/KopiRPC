@@ -62,11 +62,11 @@ void ZkClient::Start() {
 
 void ZkClient::Create(const char* path, const char* data, int datalen,
                       int state) {
-  std::string pathStr = static_cast<std::string>(path);
-  int strSize = pathStr.size();
+  char pathBuf[128];
+  int bufLen = sizeof(pathBuf);
   int flag;
   //先判断path表示的znode节点是否存在，如果存在，就不在重复创建了
-  flag = zoo_exists(mZhandle, pathStr.c_str(), 0, nullptr);
+  flag = zoo_exists(mZhandle, path, 0, nullptr);
   if (flag == ZNONODE) {
     //发现节点不存在，我们才创建, ZOO_OPEN_ACL_UNSAFE 权限设置
     /*
@@ -82,7 +82,7 @@ void ZkClient::Create(const char* path, const char* data, int datalen,
 
     // state 需要传入一个预定义变量来决定创建的是一个永久性节点还是非永久性的
     flag = zoo_create(mZhandle, path, data, datalen, &ZOO_OPEN_ACL_UNSAFE,
-                      state, &pathStr[0], strSize);
+                      state, pathBuf, bufLen);
     if (flag == ZOK) {
       std::cout << "znode create successfully... path: " << path << std::endl;
       LOG_INFO("znode create successfully... path: %s", path);
@@ -109,7 +109,7 @@ std::string ZkClient::GetData(const char* path) {
     // 如果buf是char[]，不能直接return buf
     // zoo_get只写实际字节，buf是未初始化的64字节数组
     // 在构造stirng，碰上了0字节为止，可能会越界读
-    // 我们决定将char buf[] 换成 string 
+    // 我们决定将char buf[] 换成 string
     // 而 ZK 是二进制协议、不写 '\0' → 崩。
     // string 版本的 buf.resize(bufLen) 强制你把 ZK 给的长度接回容器
     buf.resize(bufLen);
