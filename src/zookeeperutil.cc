@@ -95,3 +95,8 @@ void ZkClient::Create(const char* path, const char* data, int datalen,
     }
   }
 }
+
+//根据指定的path, 获取znode节点的值
+std::string ZkClient::GetData(const char* path){
+
+}
