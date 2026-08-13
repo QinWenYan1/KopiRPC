@@ -60,6 +60,11 @@ void ZkClient::Start() {
   LOG_INFO("zookeeper_init success");
 }
 
-void ZkClient::Create(const char *path, const char *data, int datalen, int state){
-    std::string pathStr = static_cast<std::string>(path); 
+void ZkClient::Create(const char* path, const char* data, int datalen,
+                      int state) {
+  std::string pathStr = static_cast<std::string>(path);
+  int StrSize = pathStr.size();
+  int flag;
+  //先判断path表示的znode节点是否存在，如果存在，就不在重复创建了
+  flag = zoo_exists(mZhandle, pathStr.c_str(), 0, nullptr);
 }
