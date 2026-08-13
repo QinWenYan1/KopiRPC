@@ -63,8 +63,35 @@ void ZkClient::Start() {
 void ZkClient::Create(const char* path, const char* data, int datalen,
                       int state) {
   std::string pathStr = static_cast<std::string>(path);
-  int StrSize = pathStr.size();
+  int strSize = pathStr.size();
   int flag;
   //先判断path表示的znode节点是否存在，如果存在，就不在重复创建了
   flag = zoo_exists(mZhandle, pathStr.c_str(), 0, nullptr);
+  if (flag == ZNONODE) {
+    //发现节点不存在，我们才创建, ZOO_OPEN_ACL_UNSAFE 权限设置
+    /*
+    * 它是一个预定义常量，等价于一张只有一条记录的表：
+    * { "world", "anyone", 所有5种权限 }
+    * 翻译成人话：世界上任何一个连上 ZK
+    的客户端，不需要任何认证，就能对这个节点为所欲为（读、写、建、删、改权限）。
+
+    * world:anyone —— 不做任何身份检查，谁连上谁就是"合法用户"
+    * OPEN —— 权限全开
+    * UNSAFE —— 名字里这个后缀就是官方在警告你：这不安全，生产环境别用
+    */
+
+    // state 需要传入一个预定义变量来决定创建的是一个永久性节点还是非永久性的
+    flag = zoo_create(mZhandle, path, data, datalen, &ZOO_OPEN_ACL_UNSAFE,
+                      state, const_cast<char*>(pathStr.c_str()), strSize);
+    if (flag == ZOK) {
+      std::cout << "znode create successfully... path: " << path << std::endl;
+      LOG_INFO("znode create successfully... path: %s", path);
+    }else{
+        std::cout << "flag: " << flag << std::endl; 
+        LOG_INFO("flag: %d", flag); 
+        std::cout << "znode create error... path: " << path << std::endl; 
+        LOG_INFO("znode create error... path: %s", path); 
+        exit(EXIT_FAILURE);
+    }
+  }
 }
