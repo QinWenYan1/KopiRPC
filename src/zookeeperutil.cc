@@ -86,26 +86,29 @@ void ZkClient::Create(const char* path, const char* data, int datalen,
     if (flag == ZOK) {
       std::cout << "znode create successfully... path: " << path << std::endl;
       LOG_INFO("znode create successfully... path: %s", path);
-    }else{
-        std::cout << "flag: " << flag << std::endl; 
-        LOG_ERR("flag: %d", flag); 
-        std::cout << "znode create error... path: " << path << std::endl; 
-        LOG_ERR("znode create error... path: %s", path); 
-        exit(EXIT_FAILURE);
+    } else {
+      std::cout << "flag: " << flag << std::endl;
+      LOG_ERR("flag: %d", flag);
+      std::cout << "znode create error... path: " << path << std::endl;
+      LOG_ERR("znode create error... path: %s", path);
+      exit(EXIT_FAILURE);
     }
   }
 }
 
 //根据指定的path, 获取znode节点的值
-std::string ZkClient::GetData(const char* path){
-    char buf[64]; 
-    int bufLen = sizeof(buf); 
-    int flag = zoo_get(mZhandle, path, 0, buf, &bufLen, nullptr); 
-    if (flag != ZOK){
-        std::cout << "get znode error... path: " << path << std::endl; 
-        LOG_ERR("get znode error... path: %s", path); 
-        return ""; 
-    }else{
-        return buf; 
-    }
+std::string ZkClient::GetData(const char* path) {
+  char buf[64];
+  int bufLen = sizeof(buf);
+  int flag = zoo_get(mZhandle, path, 0, buf, &bufLen, nullptr);
+  if (flag != ZOK) {
+    std::cout << "get znode error... path: " << path << std::endl;
+    LOG_ERR("get znode error... path: %s", path);
+    return "";
+  } else {
+    // 不能直接return buf
+    // zoo_get只写实际字节，buf是未初始化的64字节数组
+    // 在构造stirng，碰上了0字节为止，可能会越界读
+    return std::string(buf,bufLen);
+  }
 }
