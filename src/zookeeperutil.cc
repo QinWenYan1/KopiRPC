@@ -73,7 +73,7 @@ void ZkClient::Create(const char* path, const char* data, int datalen,
     * 它是一个预定义常量，等价于一张只有一条记录的表：
     * { "world", "anyone", 所有5种权限 }
     * 翻译成人话：世界上任何一个连上 ZK
-    的客户端，不需要任何认证，就能对这个节点为所欲为（读、写、建、删、改权限）。
+    * 的客户端，不需要任何认证，就能对这个节点为所欲为（读、写、建、删、改权限）。
 
     * world:anyone —— 不做任何身份检查，谁连上谁就是"合法用户"
     * OPEN —— 权限全开
@@ -82,7 +82,7 @@ void ZkClient::Create(const char* path, const char* data, int datalen,
 
     // state 需要传入一个预定义变量来决定创建的是一个永久性节点还是非永久性的
     flag = zoo_create(mZhandle, path, data, datalen, &ZOO_OPEN_ACL_UNSAFE,
-                      state, const_cast<char*>(pathStr.c_str()), strSize);
+                      state, &pathStr[0], strSize);
     if (flag == ZOK) {
       std::cout << "znode create successfully... path: " << path << std::endl;
       LOG_INFO("znode create successfully... path: %s", path);
@@ -98,17 +98,21 @@ void ZkClient::Create(const char* path, const char* data, int datalen,
 
 //根据指定的path, 获取znode节点的值
 std::string ZkClient::GetData(const char* path) {
-  char buf[64];
-  int bufLen = sizeof(buf);
-  int flag = zoo_get(mZhandle, path, 0, buf, &bufLen, nullptr);
+  std::string buf(64, '\n');
+  int bufLen = buf.size();
+  int flag = zoo_get(mZhandle, path, 0, &buf[0], &bufLen, nullptr);
   if (flag != ZOK) {
     std::cout << "get znode error... path: " << path << std::endl;
     LOG_ERR("get znode error... path: %s", path);
     return "";
   } else {
-    // 不能直接return buf
+    // 如果buf是char[]，不能直接return buf
     // zoo_get只写实际字节，buf是未初始化的64字节数组
     // 在构造stirng，碰上了0字节为止，可能会越界读
-    return std::string(buf,bufLen);
+    // 我们决定将char buf[] 换成 string 
+    // 而 ZK 是二进制协议、不写 '\0' → 崩。
+    // string 版本的 buf.resize(bufLen) 强制你把 ZK 给的长度接回容器
+    buf.resize(bufLen);
+    return buf;
   }
 }
