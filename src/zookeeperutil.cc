@@ -88,9 +88,9 @@ void ZkClient::Create(const char* path, const char* data, int datalen,
       LOG_INFO("znode create successfully... path: %s", path);
     }else{
         std::cout << "flag: " << flag << std::endl; 
-        LOG_INFO("flag: %d", flag); 
+        LOG_ERR("flag: %d", flag); 
         std::cout << "znode create error... path: " << path << std::endl; 
-        LOG_INFO("znode create error... path: %s", path); 
+        LOG_ERR("znode create error... path: %s", path); 
         exit(EXIT_FAILURE);
     }
   }
@@ -98,5 +98,14 @@ void ZkClient::Create(const char* path, const char* data, int datalen,
 
 //根据指定的path, 获取znode节点的值
 std::string ZkClient::GetData(const char* path){
-
+    char buf[64]; 
+    int bufLen = sizeof(buf); 
+    int flag = zoo_get(mZhandle, path, 0, buf, &bufLen, nullptr); 
+    if (flag != ZOK){
+        std::cout << "get znode error... path: " << path << std::endl; 
+        LOG_ERR("get znode error... path: %s", path); 
+        return ""; 
+    }else{
+        return buf; 
+    }
 }
