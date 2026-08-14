@@ -85,7 +85,7 @@ void RpcProvider::Run() {
   ZkClient zkCli; 
   zkCli.Start(); 
   //service永久性节点 method_name为临时性节点
-  // session timeout 30s zkclient API 
+  // session timeout 30s zkclient API, 起一个网络IO线程 1/3 * timeout 时间发送ping消息
   for (auto &sp: serviceMap){
     //先组成 "/service_name" 这个路径，比如: "/UserServiceRpc"
     std::string servicePath = "/" + sp.first;
