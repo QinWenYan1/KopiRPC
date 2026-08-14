@@ -30,5 +30,6 @@ link_directories(${PROJECT_SOURCE_DIR}/lib)
 #src包含了Kopirpc框架所有的相关代码
 add_subdirectory(src)
 #使用服务框架的业务路径
-#example包含了Kopirpc框架使用的示例代码
-add_subdirectory(example)
+# example包含了Kopirpc框架使用的示例代码
+# 当作为框架的出包的情况来说，我们不需要example 进入编译环境
+# add_subdirectory(example)
