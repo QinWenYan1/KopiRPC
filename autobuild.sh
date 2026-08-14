@@ -8,9 +8,11 @@
 set -e
 
 rm -rf $(pwd)/build/* #先清理
+mkdir -p $(pwd)/build #防干净环境没有build(已存在则不动)
 cd $(pwd)/build && 
     cmake .. &&
     make -j $(nproc)
 cd ..
 
+rm -rf $(pwd)/lib/include #防已删头文件在副本里残留
 cp -r $(pwd)/src/include $(pwd)/lib #拷贝过去
