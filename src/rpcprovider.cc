@@ -7,6 +7,7 @@
 #include <muduo/net/Callbacks.h>
 #include <muduo/net/InetAddress.h>
 #include <muduo/net/TcpServer.h>
+#include <zookeeper/zookeeper.h>
 
 #include <cstdint>
 #include <cstdlib>
@@ -17,6 +18,7 @@
 #include "kopirpcapplication.h"
 #include "rpcheader.pb.h"
 #include "logger.h"
+#include "zookeeperutil.h"
 
 /*
  * servName对应一个service描述符
@@ -77,6 +79,27 @@ void RpcProvider::Run() {
   server.setThreadNum(4);
 
   LOG_INFO("RPC Provider start service at IP: %s, Port: %d", ip.c_str(), port);
+
+  //把当前rpc节点上咬发布的服务全部注册到zk上面，让rpc client可以从zk上发现服务
+  //会自动发送pin心跳消息保持与zk client的链接
+  ZkClient zkCli; 
+  zkCli.Start(); 
+  //service永久性节点 method_name为临时性节点
+  // session timeout 30s zkclient API 
+  for (auto &sp: serviceMap){
+    //先组成 "/service_name" 这个路径，比如: "/UserServiceRpc"
+    std::string servicePath = "/" + sp.first;
+    zkCli.Create(servicePath.c_str(), nullptr, 0);
+    for (auto &mp : sp.second.methodMap){
+      // 然后再组成 "/service_name/method_name" 如 "/UserServiceRpc/Login"
+      std::string methodPath = servicePath + "/" + mp.first; 
+      char data[128] = {0}; 
+      sprintf(data, "%s:%d", ip.c_str(), port); 
+      //服务的方法都是临时性节点: ZOO_EPHEMERAL 
+      zkCli.Create(methodPath.c_str(), data, strlen(data), ZOO_EPHEMERAL); 
+    }
+
+  }
 
   // 启动网络服务,进入事件循环(阻塞,此后一切由回调驱动)
   server.start();
