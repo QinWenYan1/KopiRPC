@@ -80,23 +80,23 @@ void KopiRpcChannel::CallMethod(
   }
 
   // 从 zk server 读取到服务所在 ip 和 port
-  ZkClient zkCli; 
-  zkCli.Start(); 
-  // "/UserService/Login" 
+  ZkClient zkCli;
+  zkCli.Start();
+  // "/UserService/Login"
   std::string methodPath = "/" + serviceName + "/" + methodName;
   // 从指定路径拿到指定数据 -> 127.0.0.1:8000
-  std::string data = zkCli.GetData(methodPath.c_str()); 
-  if (data == ""){
-    controller->SetFailed(methodPath + " is not existed!"); 
-    return; 
+  std::string data = zkCli.GetData(methodPath.c_str());
+  if (data == "") {
+    controller->SetFailed(methodPath + " is not existed!");
+    return;
   }
-  int idx = data.find(":"); 
-  if (idx == -1){
-    controller->SetFailed(methodPath + " address is invalid!"); 
-    return; 
+  int idx = data.find(":");
+  if (idx == -1) {
+    controller->SetFailed(methodPath + " address is invalid!");
+    return;
   }
-  std::string ip = data.substr(0, idx); 
-  uint16_t port = atoi(data.substr(idx+1, data.size()-idx).c_str()); 
+  std::string ip = data.substr(0, idx);
+  uint16_t port = atoi(data.substr(idx + 1, data.size() - idx).c_str());
 
   sockaddr_in serverAddr;
   serverAddr.sin_family = AF_INET;
@@ -139,9 +139,9 @@ void KopiRpcChannel::CallMethod(
 
   //反序列化rpc调用的响应数据
   /*
-  * 问题排除：ParseFromString为用户态操作，errno是内核态错误搬运，
-  *         ParseFromString的报错不会被记录
-  */
+   * 问题排除：ParseFromString为用户态操作，errno是内核态错误搬运，
+   *         ParseFromString的报错不会被记录
+   */
   if (!response->ParseFromString(responseStr)) {
     std::string errtxt = "parse error! response string: ";
     errtxt += responseStr;
