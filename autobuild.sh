@@ -7,10 +7,10 @@
 
 set -e
 
-rm -rf `pwd`/build/* #先清理
-cd `pwd`/build && 
+rm -rf $(pwd)/build/* #先清理
+cd $(pwd)/build && 
     cmake .. &&
-    make 
+    make -j $(nproc)
 cd ..
 
-cp -r `pwd`/src/include `pwd`/lib #拷贝过去
+cp -r $(pwd)/src/include $(pwd)/lib #拷贝过去
