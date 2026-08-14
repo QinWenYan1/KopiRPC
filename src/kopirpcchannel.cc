@@ -16,6 +16,7 @@
 #include "kopirpcapplication.h"
 #include "logger.h"
 #include "rpcheader.pb.h"
+#include "zookeeperutil.h"
 
 /*
  * 数据格式：
@@ -78,12 +79,24 @@ void KopiRpcChannel::CallMethod(
     return;
   }
 
-  std::string ip =
-      KopirpcApplication::GetInstance().GetConfigFile().Load("rpcserverip");
-  uint16_t port = atoi(KopirpcApplication::GetInstance()
-                           .GetConfigFile()
-                           .Load("rpcserverport")
-                           .c_str());
+  // 从 zk server 读取到服务所在 ip 和 port
+  ZkClient zkCli; 
+  zkCli.Start(); 
+  // "/UserService/Login" 
+  std::string methodPath = "/" + serviceName + "/" + methodName;
+  // 从指定路径拿到指定数据 -> 127.0.0.1:8000
+  std::string data = zkCli.GetData(methodPath.c_str()); 
+  if (data == ""){
+    controller->SetFailed(methodPath + " is not existed!"); 
+    return; 
+  }
+  int idx = data.find(":"); 
+  if (idx == -1){
+    controller->SetFailed(methodPath + " address is invalid!"); 
+    return; 
+  }
+  std::string ip = data.substr(0, idx); 
+  uint16_t port = atoi(data.substr(idx+1, data.size()-idx).c_str()); 
 
   sockaddr_in serverAddr;
   serverAddr.sin_family = AF_INET;
