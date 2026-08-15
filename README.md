@@ -1,6 +1,8 @@
-# KopiRPC
+![KopiRPC](docs/images/cover.jpeg)
 
 >KopiRPC (Kopi Remote Procedure Call) —— C++ 高性能远程程序调用服务框架
+
+![License](https://img.shields.io/github/license/QinWenYan1/KopiRPC) ![C++17](https://img.shields.io/badge/dialect-C%2B%2B17-blue) ![Platform](https://img.shields.io/badge/platform-Linux%20arm64-orange) ![Version](https://img.shields.io/github/v/release/QinWenYan1/KopiRPC)
 
 ---
 
@@ -91,6 +93,12 @@
 - ~~[x] 接入 ZooKeeper 服务注册与发现~~
 - ~~[x] 编写自动编译脚本(autobuild.sh:一键完成 cmake 配置与构建)~~
 - ~~[x] 端到端联调(provider + caller 跑通示例服务)~~
-- [ ] 进阶特性:异步调用、负载均衡、重试、健康检查、熔断、长连接/连接池
+- [ ] P1 单元测试基建(gtest + config/LockQueue 纯逻辑测试)
+- [ ] P2 正确性补强(帧重组 + 响应长度头 + send 全发循环 + 配套测试)
+- [ ] P3 benchmark 基线(压测客户端:QPS + RT 分位数)
+- [ ] P4 性能优化(长连接 + ZK 地址缓存,前后对比)
+- [ ] P5 出包发布(v0.1.0:tar.gz + 使用文档 + GitHub Release)
+- [ ] P6 消费验证(外部项目以包形式调通 toy 服务)
+- [ ] 进阶特性(远期):异步调用、负载均衡、重试、健康检查、熔断
 
 
