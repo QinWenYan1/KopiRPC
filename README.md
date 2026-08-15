@@ -18,7 +18,7 @@
     stub.Login(nullptr, &request, &response, nullptr);
     ```
 
-- 一句话总结：**RPC 的本质 = 函数调用的语义 + 网络传输的实现**。
+- **RPC 的本质 = 函数调用的语义 + 网络传输的实现**。
 
 ---
 ## 🤔 为什么需要 RPC？
