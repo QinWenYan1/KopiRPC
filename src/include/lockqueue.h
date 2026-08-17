@@ -23,6 +23,7 @@ class LockQueue {
     std::unique_lock<std::mutex> lock(mtx);
     while (q.empty()) {
       //日志队列为空，线程进入wait状态
+      //使用while避免假唤醒
       conVar.wait(lock);
     }
     T data = q.front();
