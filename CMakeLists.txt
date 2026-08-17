@@ -33,3 +33,5 @@ add_subdirectory(src)
 # example包含了Kopirpc框架使用的示例代码
 # 当作为框架的出包的情况来说，我们不需要example 进入编译环境
 # add_subdirectory(example)
+#单元测试路径(gtest):产物runTests进bin/不进lib/,出包零污染,常开不注释
+add_subdirectory(tests)

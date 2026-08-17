@@ -12,3 +12,6 @@ lib/
 # 保险带:正常只活在 build/ 里,根目录出现即误操作
 compile_commands.json
 
+# logger 运行时落盘的日志文件(框架/单元测试都会产生)
+*-log.txt
+
