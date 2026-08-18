@@ -93,7 +93,7 @@
 - ~~[x] 接入 ZooKeeper 服务注册与发现~~
 - ~~[x] 编写自动编译脚本(autobuild.sh:一键完成 cmake 配置与构建)~~
 - ~~[x] 端到端联调(provider + caller 跑通示例服务)~~
-- [ ] P1 单元测试基建(gtest + config/LockQueue 纯逻辑测试)
+- ~~[x] P1 单元测试基建(gtest,20 用例:config/LockQueue/Logger/Application + Logger 停机机制修复)~~
 - [ ] P2 正确性补强(帧重组 + 响应长度头 + send 全发循环 + 配套测试)
 - [ ] P3 benchmark 基线(压测客户端:QPS + RT 分位数)
 - [ ] P4 性能优化(长连接 + ZK 地址缓存,前后对比)

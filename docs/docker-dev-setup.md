@@ -38,6 +38,14 @@
 
 当前镜像架构：**linux/arm64**（适用于 Apple Silicon Mac 和 ARM64 服务器）。
 
+> 📋 **单元测试依赖提醒**：`gtest` **未预装**在镜像中。运行 `tests/` 单元测试（`./bin/runTests`）前，在容器内执行一次：
+>
+> ```bash
+> apt update && apt install -y libgtest-dev
+> ```
+>
+> Ubuntu 22.04 的 `libgtest-dev` 自带**编译好的**库文件与 CMake 配置（`find_package(GTest)` 直接可用），无需像旧版 Ubuntu 那样手动编译源码。
+
 ---
 
 ## 前置条件
