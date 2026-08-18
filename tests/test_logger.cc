@@ -33,6 +33,18 @@ static std::string ReadDailyLog() {
   return ss.str();
 }
 
+// 统计 content 里 needle 出现的次数
+static int CountOccurrences(const std::string& content,
+                            const std::string& needle) {
+  int cnt = 0;
+  size_t pos = 0;
+  while ((pos = content.find(needle, pos)) != std::string::npos) {
+    ++cnt;
+    ++pos;  // 前进一格,允许重叠匹配
+  }
+  return cnt;
+}
+
 // 轮询直到条件满足(每 50ms 查一次,至多 2s)——不写死 sleep,不怕慢机器抖动
 template <typename Pred>
 static bool PollUntil(Pred pred) {
@@ -67,11 +79,15 @@ TEST(LoggerTest, ErrLogTaggedError) {
 }
 
 // ④ 并发冒烟: 4 线程 × 50 条,不崩不卡;
-//   且 200 条最终全部落盘(出现次数恰好 200 = 队列全消费,顺手再压一遍 LockQueue)
+//   且本用例新增的 200 条最终全部落盘(=队列全消费,顺手再压一遍 LockQueue)
+//   注意: 日志文件是追加模式且跨运行存活,断言必须用"本用例新增条数"而非总条数,
+//   否则从第二次运行起必挂(基数里躺着上一次运行的 200 条)
 TEST(LoggerTest, ConcurrentLogNoCrash) {
   constexpr int kThreads = 4;
   constexpr int kPerThread = 50;
   const int kTotal = kThreads * kPerThread;
+
+  const int before = CountOccurrences(ReadDailyLog(), "kopirpc mt");
 
   std::vector<std::thread> threads;
   for (int t = 0; t < kThreads; ++t) {
@@ -81,14 +97,7 @@ TEST(LoggerTest, ConcurrentLogNoCrash) {
   }
   for (auto& th : threads) th.join();
 
-  EXPECT_TRUE(PollUntil([kTotal] {
-    std::string content = ReadDailyLog();
-    int cnt = 0;
-    size_t pos = 0;
-    while ((pos = content.find("kopirpc mt", pos)) != std::string::npos) {
-      ++cnt;
-      ++pos;
-    }
-    return cnt == kTotal;
+  EXPECT_TRUE(PollUntil([before, kTotal] {
+    return CountOccurrences(ReadDailyLog(), "kopirpc mt") - before == kTotal;
   }));
 }
