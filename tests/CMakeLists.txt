@@ -8,7 +8,6 @@ find_package(Threads REQUIRED)
 #被测实现(config/logger/application)只依赖标准库,直接编进测试程序,
 #不链libKopiRPC.a —— 避免拖入muduo/zk/protobuf整条依赖链
 add_executable(runTests
-  test_main.cc
   test_kopirpcconfig.cc
   test_lockqueue.cc
   test_logger.cc
@@ -18,5 +17,4 @@ add_executable(runTests
   ${PROJECT_SOURCE_DIR}/src/kopirpcapplication.cc)
 
 #头文件搜索路径继承顶层的include_directories(src/include)
-#自写main(见test_main.cc):绕开Logger分离线程导致的退出卡死,故不链gtest_main
-target_link_libraries(runTests GTest::gtest Threads::Threads)
+target_link_libraries(runTests GTest::gtest GTest::gtest_main Threads::Threads)

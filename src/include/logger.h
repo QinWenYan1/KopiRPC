@@ -1,5 +1,7 @@
 #pragma once
+#include <atomic>  //新增
 #include <string>
+#include <thread>  //新增
 
 #include "lockqueue.h"
 
@@ -18,12 +20,19 @@ class Logger {
   void Log(std::string msg);
 
  private:
-  int loglevel;                     //记录日志级别
-  LockQueue<std::string> logQueue;  //日志缓冲队列
+  int loglevel;                       //记录日志级别
+  LockQueue<std::string> logQueue;    //日志缓冲队列
+  std::atomic<bool> stopping{false};  //停机标志: Stop() 置位,写线程醒来自查
+  std::thread writeThread;            //写日志线程(成员持有,Stop 时 join 回收)
 
   Logger();
+  ~Logger();  //析构即停机: 进程退出时自动调 Stop(),使用方零感知
   Logger(const Logger&) = delete;
   Logger(Logger&&) = delete;
+
+  //停止写日志线程: 置标志 + 发哨兵唤醒 + join 回收(幂等,可重复调)
+  //仅析构调用;private 防止外部在运行中途掐死日志
+  void Stop();
 };
 
 // 定义日志宏给用户更方便的方式去日志写入，例如：LOG_INFO("xx %d %s", 20,
@@ -37,6 +46,7 @@ class Logger {
     logger.Log(c);                                  \
   } while (0)
 
+  
 #define LOG_ERR(logmsgformat, ...)                  \
   do {                                              \
     Logger& logger = Logger::GetInstance();         \
