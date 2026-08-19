@@ -54,5 +54,6 @@ class RpcProvider {
                  muduo::Timestamp);
   // Closure的回调操作，用于序列化rpc的response和网络发送
   void SendRpcResponse(const muduo::net::TcpConnectionPtr&,
-                       google::protobuf::Message*);
+                       google::protobuf::Message*,
+                        google::protobuf::Message*);
 };

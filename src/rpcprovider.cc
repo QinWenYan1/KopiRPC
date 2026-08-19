@@ -20,6 +20,19 @@
 #include "rpcheader.pb.h"
 #include "zookeeperutil.h"
 
+// 现在需要自定义回调对象了，因为protobuf默认的并不支持传入5个及其以上的
+// protobuf 的 Closure 是抽象类,只需实现 Run()
+class KopiClosure : public google::protobuf::Closure {
+ public:
+  explicit KopiClosure(std::function<void()> fn) : fn_(std::move(fn)) {}
+  void Run() override {
+    fn_();
+    delete this;
+  }  //跑完自杀,对齐 NewCallback 的行为,done 本身不泄漏
+ private:
+  std::function<void()> fn_;
+};
+
 /*
  * servName对应一个service描述符
  *       service描述符对应一个或多个method 方法描述符（或者没有）
@@ -177,21 +190,22 @@ void RpcProvider::OnMessage(const muduo::net::TcpConnectionPtr& conn,
   const google::protobuf::MethodDescriptor* method = itemMethod->second;
 
   //但是还要生成方法调用的请求和响应参数从argsStr
+  /* 这里我们直接使用堆分配，但是 SendRpcResponse 里没有任何
+   * delete——全程搜不到，泄漏坐实 */
   google::protobuf::Message* request =
       service->GetRequestPrototype(method).New();
   if (!request->ParseFromString(argsStr)) {
+    delete request; 
     LOG_ERR("request parse error!");
     return;
   }
   google::protobuf::Message* response =
       service->GetResponsePrototype(method).New();
 
-  //给下面的method方法的调用，绑定一个回调函数closure done 给CallMethod
-  google::protobuf::Closure* done =
-      google::protobuf::NewCallback<RpcProvider,
-                                    const muduo::net::TcpConnectionPtr&,
-                                    google::protobuf::Message*>(
-          this, &RpcProvider::SendRpcResponse, conn, response);
+  //给下面的method方法的调用，绑定一个回调函数 closure done 给CallMethod
+  google::protobuf::Closure* done = new KopiClosure([this,conn,response,request](){
+    this->SendRpcResponse(conn, response, request); 
+  }); 
 
   //在框架上根据远端rpc请求，调用当前rpc节点上发布的方法
   //实现：new UserService().login(controller, request, response, done)
@@ -200,7 +214,8 @@ void RpcProvider::OnMessage(const muduo::net::TcpConnectionPtr& conn,
 
 // Closure的回调操作，用于序列化rpc的response和网络发送
 void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr& conn,
-                                  google::protobuf::Message* res) {
+                                  google::protobuf::Message* res,
+                                  google::protobuf::Message* req) {
   std::string responseStr;
   // response进行序列化，序列化成功后，通过网络把rpc方法执行的结果发送回rpc调用方
   if (res->SerializeToString(&responseStr)) {
@@ -209,4 +224,6 @@ void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr& conn,
     LOG_ERR("Serialize Response error!");
   }
   conn->shutdown();  //模拟http的短链接服务，由rpcprovider主动断开链接
+  delete res;
+  delete req;
 }
