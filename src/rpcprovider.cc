@@ -20,7 +20,7 @@
 #include "rpcheader.pb.h"
 #include "zookeeperutil.h"
 
-// 现在需要自定义回调对象了，因为protobuf默认的并不支持传入5个及其以上的
+// 现在需要自定义回调对象了，因为protobuf默认的最多绑定2个参数
 // protobuf 的 Closure 是抽象类,只需实现 Run()
 class KopiClosure : public google::protobuf::Closure {
  public:
