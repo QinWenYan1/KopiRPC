@@ -94,7 +94,7 @@
 - ~~[x] 编写自动编译脚本(autobuild.sh:一键完成 cmake 配置与构建)~~
 - ~~[x] 端到端联调(provider + caller 跑通示例服务)~~
 - ~~[x] P1 单元测试基建(gtest,20 用例:config/LockQueue/Logger/Application + Logger 停机机制修复)~~
-- [ ] 阶段1 benchmark(压测客户端:QPS + RT 分位数 → 基线数字)
+- ~~[x] 阶段1 benchmark(压测客户端 bench:单线程基线 avg RT 1.62ms / P99 2.64ms / QPS 615,见 docs/benchmark.md)~~
 - [ ] 阶段2 代码模块(正确性补强:帧重组+响应长度头+send全发循环;性能优化:长连接+ZK地址缓存 → 复测对比)
 - [ ] 阶段3 出包发布(v0.1.0:tar.gz + 使用文档 + GitHub Release + 外部消费验证)
 - [ ] 进阶特性(选择):异步调用、负载均衡、重试、健康检查、熔断
