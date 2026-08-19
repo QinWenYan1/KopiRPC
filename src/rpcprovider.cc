@@ -195,7 +195,7 @@ void RpcProvider::OnMessage(const muduo::net::TcpConnectionPtr& conn,
   google::protobuf::Message* request =
       service->GetRequestPrototype(method).New();
   if (!request->ParseFromString(argsStr)) {
-    delete request; 
+    delete request;
     LOG_ERR("request parse error!");
     return;
   }
@@ -203,9 +203,10 @@ void RpcProvider::OnMessage(const muduo::net::TcpConnectionPtr& conn,
       service->GetResponsePrototype(method).New();
 
   //给下面的method方法的调用，绑定一个回调函数 closure done 给CallMethod
-  google::protobuf::Closure* done = new KopiClosure([this,conn,response,request](){
-    this->SendRpcResponse(conn, response, request); 
-  }); 
+  google::protobuf::Closure* done =
+      new KopiClosure([this, conn, response, request]() {
+        this->SendRpcResponse(conn, response, request);
+      });
 
   //在框架上根据远端rpc请求，调用当前rpc节点上发布的方法
   //实现：new UserService().login(controller, request, response, done)
