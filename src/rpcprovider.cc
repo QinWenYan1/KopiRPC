@@ -22,15 +22,18 @@
 
 // 现在需要自定义回调对象了，因为protobuf默认的最多绑定2个参数
 // protobuf 的 Closure 是抽象类,只需实现 Run()
+// 继承自 google::protobuf::Closure 抽象基类
 class KopiClosure : public google::protobuf::Closure {
  public:
+ //  构造函数：接受一个 std::function 类型的回调函数 （一般是 Lambda 表达式）
+ // 并赋值给成员变量
   explicit KopiClosure(std::function<void()> fn) : fn_(std::move(fn)) {}
   void Run() override {
-    fn_();
-    delete this;
+    fn_();        //执行我们的传入的 Lambda 表达式，内部回调用 sendRpcResponse 并清理链接
+    delete this;  // 关键：根据 Protobuf Closure 的生命周期规范，执行完自我销毁，防止内存泄漏
   }  //跑完自杀,对齐 NewCallback 的行为,done 本身不泄漏
  private:
-  std::function<void()> fn_;
+  std::function<void()> fn_; //存储回调逻辑
 };
 
 /*
