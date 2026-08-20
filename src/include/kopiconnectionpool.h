@@ -4,6 +4,7 @@
 #include <queue>
 #include <mutex>
 #include <atomic>
+#include <unordered_map>
 
 struct ConnectionBucket {
     std::queue<int> free_fds;       // 存放该服务节点空闲的socket fd 队列
@@ -33,6 +34,10 @@ class KopiConnectPool {
     private:
     KopiConnectPool(); 
     ~KopiConnectPool(); 
-    
+
+    int maxConnPerNode;                                         // 每个服务节点允许的最大 TCP 链接上限
+    std::unordered_map<std::string, ConnectionBucket*> pools;   // 映射："IP:Port" -> 该节点的链接桶
+    std::mutex globalMtx;                                       // 保护 pools 节点映射创建时的全局互斥锁
+
 }; 
 
