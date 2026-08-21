@@ -133,12 +133,29 @@ int KopiConnectPool::BorrowConnection(const std::string& ip, uint16_t port){
         bucket->freeFds.pop(); 
         return fd; //在 1000 毫秒内等到了可使用的链接
     }
-    
+
     return -1; //等到超时，降级报错
 
 }
 
-// 归还链接
+// 归还链接，用完以后决定“放回去”还是“报废掉”
+/*
+* 车没坏
+* ↓
+* 放回停车场
+* ↓
+* freeFds.push(fd)
+
+* 车坏了
+* ↓
+* 直接报废
+* ↓
+* close(fd)
+* ↓
+* 停车位释放
+* ↓
+* active_count --
+*/
 void KopiConnectPool::ReturnConnection(const std::string &ip, uint16_t port, int fd, bool isBad){
     std::string key = ip + ":" + std::to_string(port); 
 
