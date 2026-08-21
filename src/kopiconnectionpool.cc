@@ -1,4 +1,4 @@
-#include "KopiConnectpool.h"
+#include "Kopiconnectpool.h"
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
@@ -8,7 +8,7 @@
 #include <mutex>
 #include <string>
 
-// 假设每个 IP:Port 最多简历 1024 个长链接 （必须是 2 的幂）
+// 假设每个 IP:Port 最多简历 1024 个长链接 
 static const int MAX_CONN_SIZE = 1024; 
 
 KopiConnectPool &KopiConnectPool::GetInstance(){
@@ -25,10 +25,10 @@ KopiConnectPool::~KopiConnectPool(){
         int fd; 
         //这里为什么使用while
         auto q = pair.second->freeFds; 
-        while (q.empty()){
-            fd = pair.second->freeFds.front();
+        while (!q.empty()){
+            fd = q.front();
             close(fd); 
-            pair.second->freeFds.pop(); 
+            q.pop(); 
         }
         delete pair.second;
     }
@@ -177,7 +177,7 @@ void KopiConnectPool::ReturnConnection(const std::string &ip, uint16_t port, int
     }
 
     std::lock_guard<std::mutex> lock(bucket->mtx); 
-    // 如果通信过程中发生过网络断开，对端关闭异常 (isTrue = true)
+    // 如果通信过程中发生过网络断开，对端关闭异常 (isBad = true)
     if (isBad){
         close(fd);                     // 彻底关闭不可用的 socket 资源
         bucket->active_count.fetch_sub(1); // 活动链接数扣减，允许后续重新建立新链接
