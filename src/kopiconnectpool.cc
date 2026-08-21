@@ -24,7 +24,7 @@ KopiConnectPool::~KopiConnectPool(){
     for ( auto &pair : pools ){
         int fd; 
         //这里为什么使用while
-        auto q = pair.second->freeFds; 
+        auto& q = pair.second->freeFds; 
         while (!q.empty()){
             fd = q.front();
             close(fd); 
