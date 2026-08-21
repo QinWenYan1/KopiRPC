@@ -34,9 +34,39 @@ KopiConnectPool::~KopiConnectPool(){
     }
 }
 
+
+
 // 借用链接：
     //      如果对应节点的 bucket 中有空闲链接则返回，否则新建；
     //      若达到上线则阻塞等待
+
+/*
+* BorrowConnection(ip, port)
+*        │
+*        ▼
+* 找到这个 ip:port 对应的 ConnectionBucket
+*        │
+*        ▼
+*┌─────────────────────────────┐
+*│ 有空闲 fd？                  │
+*│     ↓ YES                   │
+*│ 从 freeFds 拿一个 → 返回      │
+*└─────────────────────────────┘
+*        │ NO
+*        ▼
+* 还有连接额度？
+*        │
+*   ┌────┴────┐
+*   ↓ YES     ↓ NO
+* 新建 TCP     等待空闲连接
+*   │            │
+*   ↓            ↓
+* connect()     最多等 1 秒
+*   │            │
+* 成功 → fd      有 → 返回 fd
+* 失败 → -1      无 → -1
+*/
+
 int KopiConnectPool::BorrowConnection(const std::string& ip, uint16_t port){
     std::string key = ip + ":" + std::to_string(port); 
     ConnectionBucket* bucket = nullptr; 
