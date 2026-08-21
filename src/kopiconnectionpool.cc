@@ -184,5 +184,6 @@ void KopiConnectPool::ReturnConnection(const std::string &ip, uint16_t port, int
     }else{
         bucket->freeFds.push(fd);   //依旧健康的长链接，放回桶队列中的备用
     }
+    // notify_all() 不一定“错误”，但是在只有一个资源变得可用的情况下，它很容易制造不必要的竞争。
     bucket->cv.notify_one();           // 唤醒可能正在等待链接的 Borrow 线程
 }
