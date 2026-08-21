@@ -139,23 +139,28 @@ int KopiConnectPool::BorrowConnection(const std::string& ip, uint16_t port){
 }
 
 // 归还链接，用完以后决定“放回去”还是“报废掉”
-/*
-* 车没坏
-* ↓
-* 放回停车场
-* ↓
-* freeFds.push(fd)
-
-* 车坏了
-* ↓
-* 直接报废
-* ↓
-* close(fd)
-* ↓
-* 停车位释放
-* ↓
-* active_count --
-*/
+/* ReturnConnection(ip, port, fd, isBad)
+*                │
+*                ▼
+*        找到对应 bucket
+*                │
+*         ┌──────┴──────┐
+*         │             │
+*       找不到          找到了
+*         │             │
+*      close(fd)      加 bucket 锁
+*                       │
+*                ┌──────┴──────┐
+*                │             │
+*             isBad=true   isBad=false
+*                │             │
+*             close(fd)     fd 放回 freeFds
+*             count--           │
+*                │             │
+*                └──────┬──────┘
+*                       ↓
+*                  notify_one()
+*/ 
 void KopiConnectPool::ReturnConnection(const std::string &ip, uint16_t port, int fd, bool isBad){
     std::string key = ip + ":" + std::to_string(port); 
 
