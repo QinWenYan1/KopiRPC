@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <chrono>
 #include <mutex>
 
 // 假设每个 IP:Port 最多简历 1024 个长链接 （必须是 2 的幂）
@@ -70,6 +71,9 @@ int KopiConnectPool::BorrowConnection(const std::string& ip, uint16_t port){
         int fd = socket(AF_INET,SOCK_STREAM,0); 
 
         // 核心优化：禁止 TCP nagle 算法
+        //          nagle 算法：“这个包这么小，要不要等一等，看看后面有没有更多数据，可以合并起来一起发？”
+        //          减少网络开销，提高吞吐量，但可能增加延迟
+        //          Rpc request 并不大，我们更中意 低延迟
         // 小数据包不等待，直接发出，延迟大幅度降低
         int opt = 1; 
         setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt));
@@ -78,10 +82,25 @@ int KopiConnectPool::BorrowConnection(const std::string& ip, uint16_t port){
         addr.sin_family = AF_INET; 
         addr.sin_port = htons(port); 
         addr.sin_addr.s_addr = inet_addr(ip.c_str()); 
-    }
 
-    int fd = -1; 
-    // 优先从无锁队列获取
-    return -1; 
+        // 发起同步阻塞 TCP 链接
+        if (connect(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) == 0){
+            return fd; // 链接成功
+        }else{
+            close(fd); // 链接失败
+            lock.lock(); 
+            bucket->active_count.fetch_sub(1); // 计数自减
+            bucket->cv.notify_one(); 
+            return -1; 
+        }
+
+    }   
+    // 情况 C: 链接已经达到上限（1024），线程阻塞挂起，等待其他线程 ReturnConnection 释放链接
+    if (bucket->cv.wait_for(lock,std::chrono::milliseconds(1000), [&]{return !bucket->freeFds.empty();})){
+        int fd = bucket->freeFds.front(); 
+        bucket->freeFds.pop(); 
+        return fd; //在 1000 毫秒内等到了可使用的链接
+    }
+    return -1; //等到超时，降级报错
 
 }
