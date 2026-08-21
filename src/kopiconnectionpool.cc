@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <chrono>
 #include <mutex>
+#include <string>
 
 // 假设每个 IP:Port 最多简历 1024 个长链接 （必须是 2 的幂）
 static const int MAX_CONN_SIZE = 1024; 
@@ -103,4 +104,31 @@ int KopiConnectPool::BorrowConnection(const std::string& ip, uint16_t port){
     }
     return -1; //等到超时，降级报错
 
+}
+
+// 归还链接
+void KopiConnectPool::ReturnConnection(const std::string &ip, uint16_t port, int fd, bool isBad){
+    std::string key = ip + ":" + std::to_string(port); 
+
+    ConnectionBucket* bucket = nullptr; 
+    {
+        std::lock_guard<std::mutex> lock(globalMtx); 
+        auto it = pools.find(key);
+        if (it != pools.end()) bucket = it->second; 
+    }
+
+    if (!bucket){
+        close(fd); 
+        return; 
+    }
+
+    std::lock_guard<std::mutex> lock(bucket->mtx); 
+    // 如果通信过程中发生过网络断开，对端关闭异常 (isTrue = true)
+    if (isBad){
+        close(fd);                     // 彻底关闭不可用的 socket 资源
+        bucket->active_count.fetch_sub(1); // 活动链接数扣减，允许后续重新建立新链接
+    }else{
+        bucket->freeFds.push(fd);   //依旧健康的长链接，放回桶队列中的备用
+    }
+    bucket->cv.notify_one();           // 唤醒可能正在等待链接的 Borrow 线程
 }
