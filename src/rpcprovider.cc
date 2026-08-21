@@ -193,8 +193,10 @@ void RpcProvider::OnMessage(const muduo::net::TcpConnectionPtr& conn,
   const google::protobuf::MethodDescriptor* method = itemMethod->second;
 
   //但是还要生成方法调用的请求和响应参数从argsStr
-  /* 这里我们直接使用堆分配，但是 SendRpcResponse 里没有任何
-   * delete——全程搜不到，泄漏坐实 */
+  /* 
+    * 这里我们直接使用堆分配，但是 SendRpcResponse 里没有任何
+    * delete——全程搜不到，泄漏坐实 
+  */
   google::protobuf::Message* request =
       service->GetRequestPrototype(method).New();
   if (!request->ParseFromString(argsStr)) {
@@ -227,7 +229,7 @@ void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr& conn,
   } else {
     LOG_ERR("Serialize Response error!");
   }
-  conn->shutdown();  //模拟http的短链接服务，由rpcprovider主动断开链接
+  //conn->shutdown();  模拟http的短链接服务，由rpcprovider主动断开链接
   delete res;
   delete req;
 }
