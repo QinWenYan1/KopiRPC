@@ -14,7 +14,7 @@ struct ConnectionBucket {
     std::condition_variable cv;     // 条件变量，当链接达到上限，线程等待空闲链接时使用
     std::atomic<int> active_count;  // 已经成为该节点创建的所有活动 TCP 链接总数
 
-    ConnectionBucket() : active_count(0) {} 
+    ConnectionBucket(int nums = 0) : active_count(nums) {}
 }; 
 
 
