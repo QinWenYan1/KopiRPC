@@ -20,7 +20,7 @@ add_executable(runTests
   ${PROJECT_SOURCE_DIR}/src/logger.cc
   ${PROJECT_SOURCE_DIR}/src/kopirpcapplication.cc
   ${PROJECT_SOURCE_DIR}/src/netutil.cc
-  ${PROJECT_SOURCE_DIR}/src/kopiconnectionpool.cc)
+  ${PROJECT_SOURCE_DIR}/src/kopiconnectpool.cc)
 
 #头文件搜索路径继承顶层的include_directories(src/include)
 target_link_libraries(runTests GTest::gtest GTest::gtest_main Threads::Threads)
