@@ -126,12 +126,14 @@ int KopiConnectPool::BorrowConnection(const std::string& ip, uint16_t port){
         }
 
     }   
+
     // 情况 C: 链接已经达到上限（1024），线程阻塞挂起，等待其他线程 ReturnConnection 释放链接
     if (bucket->cv.wait_for(lock,std::chrono::milliseconds(1000), [&]{return !bucket->freeFds.empty();})){
         int fd = bucket->freeFds.front(); 
         bucket->freeFds.pop(); 
         return fd; //在 1000 毫秒内等到了可使用的链接
     }
+    
     return -1; //等到超时，降级报错
 
 }
