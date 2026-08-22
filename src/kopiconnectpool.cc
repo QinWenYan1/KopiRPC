@@ -8,6 +8,13 @@
 #include <mutex>
 #include <string>
 
+// KopiConnectPool 实现 —— 设计要点:
+//   ① 锁分两档: 全局锁只护"桶的创建",桶内互斥锁护各自的 fd 队列
+//     —— 不同服务节点之间零竞争
+//   ② 计数预占(active_count++)后立即解锁再做 connect:
+//     耗时系统调用绝不持锁;失败回滚计数并唤醒等待者
+//   ③ 桶满不空转: cv 最多等 1 秒,超时降级返回 -1
+
 // 假设每个 IP:Port 最多简历 1024 个长链接 
 static const int MAX_CONN_SIZE = 1024; 
 

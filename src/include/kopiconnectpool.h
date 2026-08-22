@@ -1,3 +1,16 @@
+// KopiConnectPool —— RPC 客户端连接池(单例)
+//
+// 动机(解决什么痛点):
+//   旧版 caller 每次 RPC 调用都新建一条 TCP 连接,用完即关(短连接):
+//     ① 每次调用白付一次 TCP 三次握手/四次挥手,延迟大头全在连接管理上
+//     ② 高并发下海量短连接产生大量 TIME_WAIT: 主动关闭方的源端口被锁定 60 秒,
+//       而客户端临时端口总共只有 ~2.8 万个,耗尽后 connect 直接失败
+//   本模块做法: 为每个服务节点(IP:Port)维护一个"连接桶",调用时借出空闲
+//   长连接,用完归还复用 —— 连接只建一次,反复收发,TIME_WAIT 问题根治
+//
+// 使用契约:
+//   BorrowConnection 借到 fd → 用完必须 ReturnConnection 归还;
+//   通信中发生过任何 IO 错误 → 以 is_bad=true 归还(池直接焚毁,防止坏连接污染复用)
 #pragma once 
 
 #include <condition_variable>
