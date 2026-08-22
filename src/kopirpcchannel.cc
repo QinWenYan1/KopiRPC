@@ -18,6 +18,8 @@
 #include "rpcheader.pb.h"
 #include "zookeeperutil.h"
 
+#include "netutil.h"
+
 /*
  * 数据格式：
  *   [header size ][service name][method name][args size] | [argsStr]
@@ -88,11 +90,13 @@ void KopiRpcChannel::CallMethod(
   std::string data = zkCli.GetData(methodPath.c_str());
   if (data == "") {
     controller->SetFailed(methodPath + " is not existed!");
+    close(clientfd); // 正确释放client fd 
     return;
   }
   int idx = data.find(":");
   if (idx == -1) {
     controller->SetFailed(methodPath + " address is invalid!");
+    close(clientfd); 
     return;
   }
   std::string ip = data.substr(0, idx);
@@ -114,7 +118,7 @@ void KopiRpcChannel::CallMethod(
   }
 
   //发送rpc请求
-  if (send(clientfd, sendRpcStr.c_str(), sendRpcStr.size(), 0) == -1) {
+  if (SendAll(clientfd, sendRpcStr.c_str(), sendRpcStr.size()) == false) {
     std::string errtxt = "send error! errno: ";
     errtxt += std::to_string(errno);
     if (controller) controller->SetFailed(errtxt);
