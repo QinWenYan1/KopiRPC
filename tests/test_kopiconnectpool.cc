@@ -1,8 +1,9 @@
 // KopiConnectPool 单元测试: 借/还/焚毁语义
 // 手段: 本地起 listen socket 当假服务器,用 accept 计数观察"是否真的复用了连接"
-// (不断言 fd 数值 —— OS 会回收 fd 号,复用与否要看"有没有新建连接",即 accept 计数)
-#include <gtest/gtest.h>
+// (不断言 fd 数值 —— OS 会回收 fd 号,复用与否要看"有没有新建连接",即 accept
+// 计数)
 #include <arpa/inet.h>
+#include <gtest/gtest.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -15,7 +16,8 @@
 namespace {
 
 // 假服务器: 只 listen + accept 计数,不读不写
-// (connect 成功不需要对端 accept,内核 backlog 会接住握手;计数只为观察连接新建次数)
+// (connect 成功不需要对端 accept,内核 backlog
+// 会接住握手;计数只为观察连接新建次数)
 struct FakeServer {
   int lfd = -1;
   uint16_t port = 0;

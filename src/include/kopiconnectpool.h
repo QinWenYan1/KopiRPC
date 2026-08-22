@@ -10,49 +10,49 @@
 //
 // 使用契约:
 //   BorrowConnection 借到 fd → 用完必须 ReturnConnection 归还;
-//   通信中发生过任何 IO 错误 → 以 is_bad=true 归还(池直接焚毁,防止坏连接污染复用)
-#pragma once 
+//   通信中发生过任何 IO 错误 → 以 is_bad=true
+//   归还(池直接焚毁,防止坏连接污染复用)
+#pragma once
 
-#include <condition_variable>
-#include <queue>
-#include <mutex>
 #include <atomic>
-#include <unordered_map>
-#include <string>
+#include <condition_variable>
 #include <cstdint>
+#include <mutex>
+#include <queue>
+#include <string>
+#include <unordered_map>
 
 struct ConnectionBucket {
-    std::queue<int> freeFds;       // 存放该服务节点空闲的socket fd 队列
-    std::mutex mtx;                 // 保护当前桶内部 free_fds 队列的互斥锁
-    std::condition_variable cv;     // 条件变量，当链接达到上限，线程等待空闲链接时使用
-    std::atomic<int> active_count;  // 已经成为该节点创建的所有活动 TCP 链接总数
+  std::queue<int> freeFds;  // 存放该服务节点空闲的socket fd 队列
+  std::mutex mtx;           // 保护当前桶内部 free_fds 队列的互斥锁
+  std::condition_variable
+      cv;  // 条件变量，当链接达到上限，线程等待空闲链接时使用
+  std::atomic<int> active_count;  // 已经成为该节点创建的所有活动 TCP 链接总数
 
-    ConnectionBucket(int nums = 0) : active_count(nums) {}
-}; 
-
+  ConnectionBucket(int nums = 0) : active_count(nums) {}
+};
 
 class KopiConnectPool {
-    public:
-    // 获取链接池单例
-    static KopiConnectPool &GetInstance(); 
+ public:
+  // 获取链接池单例
+  static KopiConnectPool &GetInstance();
 
-    // 借用链接：
-    //      如果对应节点的 bucket 中有空闲链接则返回，否则新建；
-    //      若达到上线则阻塞等待
-    int BorrowConnection(const std::string&, uint16_t); 
+  // 借用链接：
+  //      如果对应节点的 bucket 中有空闲链接则返回，否则新建；
+  //      若达到上线则阻塞等待
+  int BorrowConnection(const std::string &, uint16_t);
 
-    // 归还链接：
-    //      使用完毕后必须归还，如果链接已经损坏（is_bad = true）
-    //      则直接关闭并扣减 active_count
-    void ReturnConnection(const std::string&, uint16_t, int, bool); 
+  // 归还链接：
+  //      使用完毕后必须归还，如果链接已经损坏（is_bad = true）
+  //      则直接关闭并扣减 active_count
+  void ReturnConnection(const std::string &, uint16_t, int, bool);
 
-    private:
-    KopiConnectPool(); 
-    ~KopiConnectPool(); 
+ private:
+  KopiConnectPool();
+  ~KopiConnectPool();
 
-    int maxConnPerNode;                                         // 每个服务节点允许的最大 TCP 链接上限
-    std::unordered_map<std::string, ConnectionBucket*> pools;   // 映射："IP:Port" -> 该节点的链接桶
-    std::mutex globalMtx;                                       // 保护 pools 中 bucket 映射创建时的全局互斥锁
-
-}; 
-
+  int maxConnPerNode;  // 每个服务节点允许的最大 TCP 链接上限
+  std::unordered_map<std::string, ConnectionBucket *>
+      pools;             // 映射："IP:Port" -> 该节点的链接桶
+  std::mutex globalMtx;  // 保护 pools 中 bucket 映射创建时的全局互斥锁
+};

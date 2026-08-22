@@ -15,7 +15,9 @@
 namespace {
 
 // 造一对已连接的 socket;fds[0]/fds[1] 互通
-void MakePair(int fds[2]) { ASSERT_EQ(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fds)); }
+void MakePair(int fds[2]) {
+  ASSERT_EQ(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fds));
+}
 
 void ClosePair(int fds[2]) {
   close(fds[0]);
@@ -46,11 +48,13 @@ TEST(NetUtil, SendNLargePayloadAllBytesInOrder) {
   MakePair(fds);
 
   int sndbuf = 4096;  // 调小发送缓冲,放大"一次发不完"的概率
-  ASSERT_EQ(0, setsockopt(fds[0], SOL_SOCKET, SO_SNDBUF, &sndbuf, sizeof(sndbuf)));
+  ASSERT_EQ(0,
+            setsockopt(fds[0], SOL_SOCKET, SO_SNDBUF, &sndbuf, sizeof(sndbuf)));
 
   const size_t total = 1 << 20;  // 1MB
   std::vector<char> payload(total);
-  for (size_t i = 0; i < total; ++i) payload[i] = static_cast<char>(i * 131 + 7);
+  for (size_t i = 0; i < total; ++i)
+    payload[i] = static_cast<char>(i * 131 + 7);
 
   // 接收线程: 边收边存,直到对端关写(EOF)
   std::vector<char> received;
