@@ -3,7 +3,7 @@
 #include <cerrno>
 #include <sys/socket.h>
 
-bool SendAll(int fd, const char* data, size_t len) {
+bool SendN(int fd, const char* data, size_t len) {
   size_t sent = 0;
   while (sent < len) {
     ssize_t n = send(fd, data + sent, len - sent, MSG_NOSIGNAL);

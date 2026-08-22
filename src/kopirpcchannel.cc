@@ -118,7 +118,7 @@ void KopiRpcChannel::CallMethod(
   }
 
   //发送rpc请求
-  if (SendAll(clientfd, sendRpcStr.c_str(), sendRpcStr.size()) == false) {
+  if (SendN(clientfd, sendRpcStr.c_str(), sendRpcStr.size()) == false) {
     std::string errtxt = "send error! errno: ";
     errtxt += std::to_string(errno);
     if (controller) controller->SetFailed(errtxt);

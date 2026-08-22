@@ -8,6 +8,7 @@ set(SRC_LIST
     logger.cc
     zookeeperutil.cc
     netutil.cc
+    kopiconnectpool.cc
     )
 #静态库
 add_library(KopiRPC ${SRC_LIST}) 
