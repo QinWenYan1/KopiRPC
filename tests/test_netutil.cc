@@ -1,4 +1,4 @@
-// netutil 单元测试: SendAll / RecvN 的契约验证
+// netutil 单元测试: SendN / RecvN 的契约验证
 // 手段: socketpair(AF_UNIX) 造一对互通的本地 socket,不碰网络/ZK/框架
 #include <gtest/gtest.h>
 #include <sys/socket.h>
@@ -22,13 +22,13 @@ void ClosePair(int fds[2]) {
   close(fds[1]);
 }
 
-// 小包直发直收: SendAll 基本契约
-TEST(NetUtil, SendAllSmallPayload) {
+// 小包直发直收: SendN 基本契约
+TEST(NetUtil, SendNSmallPayload) {
   int fds[2];
   MakePair(fds);
 
   const std::string msg = "hello kopirpc";
-  ASSERT_TRUE(SendAll(fds[0], msg.data(), msg.size()));
+  ASSERT_TRUE(SendN(fds[0], msg.data(), msg.size()));
 
   char buf[64] = {0};
   ssize_t n = read(fds[1], buf, sizeof(buf));
@@ -40,8 +40,8 @@ TEST(NetUtil, SendAllSmallPayload) {
 
 // 大载荷: 调小发送缓冲 + 对端边收边比,验证"全部字节按序到达"
 // (阻塞 socket 下部分写入由内核与信号时机决定,无法 100% 确定性触发;
-//  本用例验证的是 SendAll 的契约: 要么全发完返回 true,要么 false)
-TEST(NetUtil, SendAllLargePayloadAllBytesInOrder) {
+//  本用例验证的是 SendN 的契约: 要么全发完返回 true,要么 false)
+TEST(NetUtil, SendNLargePayloadAllBytesInOrder) {
   int fds[2];
   MakePair(fds);
 
@@ -63,7 +63,7 @@ TEST(NetUtil, SendAllLargePayloadAllBytesInOrder) {
     }
   });
 
-  ASSERT_TRUE(SendAll(fds[0], payload.data(), payload.size()));
+  ASSERT_TRUE(SendN(fds[0], payload.data(), payload.size()));
   shutdown(fds[0], SHUT_WR);  // 通知接收方:发完了
   reader.join();
 

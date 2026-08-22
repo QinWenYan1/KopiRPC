@@ -9,7 +9,7 @@
 //   所以每个调用点本该都写同一个"没发完/没读够就再来一次"的循环;
 //   本文件把循环收敛成两个函数, 调用点一行搞定:
 //     SendN —— 循环发, 直到 len 字节全部发出才 true
-//     RecvN   —— 循环收, 读满 len 字节才 true(配合长度头确定一条消息的边界)
+//     RecvN —— 循环收, 读满 len 字节才 true(配合长度头确定一条消息的边界)
 //
 // 关键细节:
 //   · send 带 MSG_NOSIGNAL: 对端已关闭时默认触发 SIGPIPE 会杀掉整个进程,
@@ -23,4 +23,4 @@
 bool SendN(int fd, const char* data, size_t len);
 
 //从 fd 读满 len 字节到 buf: 读满 true;对端关闭(recv=0)或出错 false
-bool SafeN(int fd, char* buf, size_t len);
+bool RecvN(int fd, char* buf, size_t len);
