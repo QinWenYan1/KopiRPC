@@ -22,6 +22,15 @@
 #include "rpcheader.pb.h"
 #include "zookeeperutil.h"
 
+
+// d2: ZK 地址缓存 —— methodPath -> "ip:port"
+// 命中则跳过整个 ZK 会话(Start+GetData 是一次完整 TCP 会话,每次调用的大头开销)
+// mutex 护 map: CallMethod 会被多线程并发调(bench 就是 8 线程)
+// 已知限制(挂账): 缓存不过期 —— provider 换地址/重启后旧缓存仍在,失效/watcher 留后续
+static std::unordered_map<std::string, std::string> s_addrCache;
+static std::mutex s_addrCacheMtx;
+
+
 /*
  * 数据格式：
  *   [header size ][service name][method name][args size] | [argsStr]
@@ -83,18 +92,35 @@ void KopiRpcChannel::CallMethod(
   // return;
   //}
 
-  // 从 zk server 读取到服务所在 ip 和 port
-  ZkClient zkCli;
-  zkCli.Start();
   // "/UserService/Login"
   std::string methodPath = "/" + serviceName + "/" + methodName;
-  // 从指定路径拿到指定数据 -> 127.0.0.1:8000
-  std::string data = zkCli.GetData(methodPath.c_str());
+
+  // d2: 先查缓存,未命中才开 ZK 会话;锁只护 map 读写两行,ZK 网络查询绝不持锁
+  std::string data;
+  {
+    std::lock_guard<std::mutex> lock(s_addrCacheMtx);
+    auto it = s_addrCache.find(methodPath);
+    if (it != s_addrCache.end()) data = it->second;
+  }
+  if (data.empty()) {
+    // 从 zk server 读取到服务所在 ip 和 port
+    ZkClient zkCli;
+    zkCli.Start();
+    // 从指定路径拿到指定数据 -> 127.0.0.1:8000
+    data = zkCli.GetData(methodPath.c_str());  // 从指定路径拿到数据 -> 127.0.0.1:8000
+    if (!data.empty()) {
+      std::lock_guard<std::mutex> lock(s_addrCacheMtx);
+      s_addrCache[methodPath] = data;
+    }
+  }
+
+  // 缓存也没有数据，zookeeper 服务器也没有数据
   if (data == "") {
     controller->SetFailed(methodPath + " is not existed!");
     // close(clientfd);  // 正确释放client fd
     return;
   }
+
   int idx = data.find(":");
   if (idx == -1) {
     controller->SetFailed(methodPath + " address is invalid!");
