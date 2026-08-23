@@ -118,8 +118,16 @@ void KopiRpcChannel::CallMethod(
   //  return;
   //}
 
-  int clientfd = KopiConnectPool::GetInstance().BorrowConnection(ip, port); 
-  if (clientfd == -1) { 
+  // d1 池化动机: 旧版每次调用 socket()+connect() 新建短连接,用完 close
+  //   —— 每次白付一次 TCP 握手/挥手,高并发下还制造海量 TIME_WAIT 耗尽源端口。
+  //   现在改为向连接池借: 有现成空闲连接直接复用,没有才新建(动机详见 kopiconnectpool.h)。
+  //
+  //   借还铁律(像 new/delete 配对): 从借到这一刻起,本函数每条 return 路径
+  //   都必须归还 —— 通信失败的还 isBad=true(池焚毁,防坏连接污染复用),
+  //   一切顺利的还 isBad=false(健康回队,下次调用接着用)。
+  //   从借到还之间,本函数不再出现 close(clientfd): 关连接是池的内部职责。
+  int clientfd = KopiConnectPool::GetInstance().BorrowConnection(ip, port);
+  if (clientfd == -1) {
     /* SetFailed("borrow error") + return,不用 close */ 
     std::string errtxt = "Borrow connection error! errno: ";
     errtxt += std::to_string(errno);
@@ -128,6 +136,9 @@ void KopiRpcChannel::CallMethod(
   }
 
   //发送rpc请求
+  // 发送失败 = 连接已受伤 → 还 isBad=true 焚毁;下同(RecvN/parse 失败同理)
+  // parse 失败虽"帧收对了",但 caller 分不清是内容脏还是流早已错位
+  // —— 错位会留在流里毒害下个借用者,说不清就焚,代价仅一次重建
   if (SendN(clientfd, sendRpcStr.c_str(), sendRpcStr.size()) == false) {
     std::string errtxt = "send error! errno: ";
     errtxt += std::to_string(errno);
@@ -136,7 +147,6 @@ void KopiRpcChannel::CallMethod(
     return;
   }
 
-  // 循环接收,直到对端关闭连接(recv 返回 0)
   // std::string responseStr;
   // char buf[1024];
   // ssize_t n = 0;
@@ -185,5 +195,6 @@ void KopiRpcChannel::CallMethod(
     KopiConnectPool::GetInstance().ReturnConnection(ip, port, clientfd, true); 
     return;
   }
-  KopiConnectPool::GetInstance().ReturnConnection(ip, port, clientfd, false); 
+  // 一切顺利: isBad=false 健康归还,连接回桶等待下次复用
+  KopiConnectPool::GetInstance().ReturnConnection(ip, port, clientfd, false);
 }
