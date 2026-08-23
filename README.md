@@ -103,7 +103,7 @@
 - ~~[x] 端到端联调(provider + caller 跑通示例服务)~~
 - ~~[x] P1 单元测试基建(gtest,20 用例:config/LockQueue/Logger/Application + Logger 停机机制修复)~~
 - ~~[x] 阶段1 benchmark(压测客户端 bench:单线程基线 avg RT 1.62ms / P99 2.64ms / QPS 615,见 docs/benchmark.md)~~
-- ~~[x] 阶段2 代码模块(响应长度头 + SendN/RecvN + 连接池 + ZK 地址缓存):复测 QPS 615→11976、avg RT 1.62→0.083ms(~20×,8线程 58019 QPS,见 docs/benchmark.md)~~
+- ~~[x] 阶段2 代码模块(响应长度头 + SendN/RecvN + 连接池 + ZK 地址缓存):复测 QPS 615→11976、avg RT 1.62→0.083ms~~
 - [ ] 阶段3 出包发布(v0.1.0:tar.gz + 使用文档 + GitHub Release + 外部消费验证)
 - [ ] 进阶特性(选择):帧重组(大消息/跨网络粘包半包)、服务多实例注册与一致性哈希负载均衡、异步调用、重试、健康检查、熔断
 
