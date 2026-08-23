@@ -225,7 +225,12 @@ void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr& conn,
   std::string responseStr;
   // response进行序列化，序列化成功后，通过网络把rpc方法执行的结果发送回rpc调用方
   if (res->SerializeToString(&responseStr)) {
-    conn->send(responseStr);
+        // 响应帧: [4字节 respSize][responseStr]
+    uint32_t respSize = responseStr.size();
+    std::string frame;
+    frame.append(reinterpret_cast<char*>(&respSize), sizeof(respSize));
+    frame += responseStr;
+    conn->send(frame);
   } else {
     LOG_ERR("Serialize Response error!");
   }

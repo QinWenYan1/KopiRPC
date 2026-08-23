@@ -15,10 +15,9 @@
 
 #include "kopirpcapplication.h"
 #include "logger.h"
+#include "netutil.h"
 #include "rpcheader.pb.h"
 #include "zookeeperutil.h"
-
-#include "netutil.h"
 
 /*
  * 数据格式：
@@ -90,13 +89,13 @@ void KopiRpcChannel::CallMethod(
   std::string data = zkCli.GetData(methodPath.c_str());
   if (data == "") {
     controller->SetFailed(methodPath + " is not existed!");
-    close(clientfd); // 正确释放client fd 
+    close(clientfd);  // 正确释放client fd
     return;
   }
   int idx = data.find(":");
   if (idx == -1) {
     controller->SetFailed(methodPath + " address is invalid!");
-    close(clientfd); 
+    close(clientfd);
     return;
   }
   std::string ip = data.substr(0, idx);
@@ -127,14 +126,34 @@ void KopiRpcChannel::CallMethod(
   }
 
   // 循环接收,直到对端关闭连接(recv 返回 0)
-  std::string responseStr;
-  char buf[1024];
-  ssize_t n = 0;
-  while ((n = recv(clientfd, buf, sizeof(buf), 0)) > 0) {
-    responseStr.append(buf, n);  //问题排除： string(buf, n, size)导致的阶段出错
+  // std::string responseStr;
+  // char buf[1024];
+  // ssize_t n = 0;
+  // while ((n = recv(clientfd, buf, sizeof(buf), 0)) > 0) {
+  //   responseStr.append(buf, n);  //问题排除： string(buf, n,
+  //   size)导致的阶段出错
+  // }
+  // if (n == -1) {
+  //  std::string errtxt = "receiving error: ";
+  //  errtxt += std::to_string(errno);
+  //  if (controller) controller->SetFailed(errtxt);
+  //  close(clientfd);
+  //  return;
+  //}
+
+  // 收响应帧: 先读 4 字节 respSize,再读 respSize 字节 body
+  uint32_t respSize = 0;
+  if (!RecvN(clientfd, reinterpret_cast<char*>(&respSize), sizeof(respSize))) {
+    std::string errtxt = "recv response size error! errno: ";
+    errtxt += std::to_string(errno);
+    if (controller) controller->SetFailed(errtxt);
+    close(clientfd);
+    return;
   }
-  if (n == -1) {
-    std::string errtxt = "receiving error: ";
+
+  std::string responseStr(respSize, '\0');
+  if (!RecvN(clientfd, &responseStr[0], respSize)) {
+    std::string errtxt = "recv response body error! errno: ";
     errtxt += std::to_string(errno);
     if (controller) controller->SetFailed(errtxt);
     close(clientfd);
