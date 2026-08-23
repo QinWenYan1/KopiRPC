@@ -11,15 +11,16 @@
 #include <unistd.h>
 
 #include <cstring>
+#include <mutex>
 #include <string>
+#include <unordered_map>
 
+#include "kopiconnectpool.h"
 #include "kopirpcapplication.h"
 #include "logger.h"
 #include "netutil.h"
 #include "rpcheader.pb.h"
 #include "zookeeperutil.h"
-
-#include "kopiconnectpool.h"
 
 /*
  * 数据格式：
@@ -74,14 +75,14 @@ void KopiRpcChannel::CallMethod(
            serviceName.c_str(), methodName.c_str());
 
   //使用tcp编程发送字符流，完成rpc的远程调用
-  //int clientfd = socket(AF_INET, SOCK_STREAM, 0);
-  //if (clientfd == -1) {
+  // int clientfd = socket(AF_INET, SOCK_STREAM, 0);
+  // if (clientfd == -1) {
   //  std::string errtxt = "create socket error! errno: ";
   //  errtxt += std::to_string(errno);
   //  if (controller) controller->SetFailed(errtxt);
   // return;
   //}
-  
+
   // 从 zk server 读取到服务所在 ip 和 port
   ZkClient zkCli;
   zkCli.Start();
@@ -91,25 +92,25 @@ void KopiRpcChannel::CallMethod(
   std::string data = zkCli.GetData(methodPath.c_str());
   if (data == "") {
     controller->SetFailed(methodPath + " is not existed!");
-    //close(clientfd);  // 正确释放client fd
+    // close(clientfd);  // 正确释放client fd
     return;
   }
   int idx = data.find(":");
   if (idx == -1) {
     controller->SetFailed(methodPath + " address is invalid!");
-    //close(clientfd);
+    // close(clientfd);
     return;
   }
   std::string ip = data.substr(0, idx);
   uint16_t port = atoi(data.substr(idx + 1, data.size() - idx).c_str());
 
-  //sockaddr_in serverAddr;
-  //serverAddr.sin_family = AF_INET;
-  //serverAddr.sin_port = htons(port);
-  //serverAddr.sin_addr.s_addr = inet_addr(ip.c_str());
+  // sockaddr_in serverAddr;
+  // serverAddr.sin_family = AF_INET;
+  // serverAddr.sin_port = htons(port);
+  // serverAddr.sin_addr.s_addr = inet_addr(ip.c_str());
 
   // rpc服务节点链接启动
-  //if (connect(clientfd, reinterpret_cast<sockaddr*>(&serverAddr),
+  // if (connect(clientfd, reinterpret_cast<sockaddr*>(&serverAddr),
   //            sizeof(serverAddr)) == -1) {
   //  std::string errtxt = "connection error! errno: ";
   //  errtxt += std::to_string(errno);
@@ -120,7 +121,8 @@ void KopiRpcChannel::CallMethod(
 
   // d1 池化动机: 旧版每次调用 socket()+connect() 新建短连接,用完 close
   //   —— 每次白付一次 TCP 握手/挥手,高并发下还制造海量 TIME_WAIT 耗尽源端口。
-  //   现在改为向连接池借: 有现成空闲连接直接复用,没有才新建(动机详见 kopiconnectpool.h)。
+  //   现在改为向连接池借: 有现成空闲连接直接复用,没有才新建(动机详见
+  //   kopiconnectpool.h)。
   //
   //   借还铁律(像 new/delete 配对): 从借到这一刻起,本函数每条 return 路径
   //   都必须归还 —— 通信失败的还 isBad=true(池焚毁,防坏连接污染复用),
@@ -128,11 +130,11 @@ void KopiRpcChannel::CallMethod(
   //   从借到还之间,本函数不再出现 close(clientfd): 关连接是池的内部职责。
   int clientfd = KopiConnectPool::GetInstance().BorrowConnection(ip, port);
   if (clientfd == -1) {
-    /* SetFailed("borrow error") + return,不用 close */ 
+    /* SetFailed("borrow error") + return,不用 close */
     std::string errtxt = "Borrow connection error! errno: ";
     errtxt += std::to_string(errno);
     if (controller) controller->SetFailed(errtxt);
-    return; 
+    return;
   }
 
   //发送rpc请求
@@ -143,7 +145,7 @@ void KopiRpcChannel::CallMethod(
     std::string errtxt = "send error! errno: ";
     errtxt += std::to_string(errno);
     if (controller) controller->SetFailed(errtxt);
-    KopiConnectPool::GetInstance().ReturnConnection(ip, port, clientfd, true); 
+    KopiConnectPool::GetInstance().ReturnConnection(ip, port, clientfd, true);
     return;
   }
 
@@ -170,7 +172,7 @@ void KopiRpcChannel::CallMethod(
     std::string errtxt = "recv response size error! errno: ";
     errtxt += std::to_string(errno);
     if (controller) controller->SetFailed(errtxt);
-    KopiConnectPool::GetInstance().ReturnConnection(ip, port, clientfd, true); 
+    KopiConnectPool::GetInstance().ReturnConnection(ip, port, clientfd, true);
     return;
   }
 
@@ -179,7 +181,7 @@ void KopiRpcChannel::CallMethod(
     std::string errtxt = "recv response body error! errno: ";
     errtxt += std::to_string(errno);
     if (controller) controller->SetFailed(errtxt);
-    KopiConnectPool::GetInstance().ReturnConnection(ip, port, clientfd, true); 
+    KopiConnectPool::GetInstance().ReturnConnection(ip, port, clientfd, true);
     return;
   }
 
@@ -192,7 +194,7 @@ void KopiRpcChannel::CallMethod(
     std::string errtxt = "parse error! response string: ";
     errtxt += responseStr;
     if (controller) controller->SetFailed(errtxt);
-    KopiConnectPool::GetInstance().ReturnConnection(ip, port, clientfd, true); 
+    KopiConnectPool::GetInstance().ReturnConnection(ip, port, clientfd, true);
     return;
   }
   // 一切顺利: isBad=false 健康归还,连接回桶等待下次复用
