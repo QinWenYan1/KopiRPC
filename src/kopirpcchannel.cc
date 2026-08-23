@@ -142,6 +142,8 @@ void KopiRpcChannel::CallMethod(
   //}
 
   // 收响应帧: 先读 4 字节 respSize,再读 respSize 字节 body
+  // —— 与 provider SendRpcResponse 是同一纸契约的两端(动机见 rpcprovider.cc):
+  //   旧版"recv 至 0 等 EOF"已随池化废除(连接不再关闭,永远等不到 0)
   uint32_t respSize = 0;
   if (!RecvN(clientfd, reinterpret_cast<char*>(&respSize), sizeof(respSize))) {
     std::string errtxt = "recv response size error! errno: ";

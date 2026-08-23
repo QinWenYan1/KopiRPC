@@ -218,6 +218,15 @@ void RpcProvider::OnMessage(const muduo::net::TcpConnectionPtr& conn,
   service->CallMethod(method, nullptr, request, response, done);
 }
 
+// b 步动机(为什么响应要加 4 字节长度头):
+//   旧版响应没有边界, 靠"provider 回完就 shutdown"的 EOF 当完结信号
+//   (caller 的 recv 读到 0 就知道发完了) —— 白嫖 TCP 的 EOF,
+//   代价是每条连接只能跑一发, 和连接池"回完不许关"直接冲突。
+//   TCP 字节流只有两种完结信号: 自带长度 或 EOF;
+//   EOF 被池化拿走了, 响应只能自带长度 → 响应帧 = [4字节 respSize][body]。
+//   双侧契约: 这里拼头, caller 侧必须先 RecvN(4) 再 RecvN(respSize),
+//   两侧必须同一次构建一起换, 否则一边新协议一边旧协议必挂。
+//   字节序沿用请求侧同款: 主机序裸 4 字节(localhost/同架构场景)。
 // Closure的回调操作，用于序列化rpc的response和网络发送
 void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr& conn,
                                   google::protobuf::Message* res,
@@ -234,7 +243,7 @@ void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr& conn,
   } else {
     LOG_ERR("Serialize Response error!");
   }
-  //conn->shutdown();  模拟http的短链接服务，由rpcprovider主动断开链接
+  // 不再 shutdown: 长度头已当边界, 连接留着给池复用
   delete res;
   delete req;
 }
