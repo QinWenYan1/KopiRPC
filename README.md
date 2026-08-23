@@ -79,6 +79,14 @@
   
 ---
 
+## 📊 性能表现
+
+- 连接池 + ZK 地址缓存优化后:单线程 **QPS 615 → 11976(约 20×)**,avg RT 1.62ms → 0.083ms;8 线程吞吐 **58019 QPS**
+- 测试环境:Docker 容器(Ubuntu 22.04,linux/arm64 @ Apple Silicon),localhost 回环
+- 完整方法与数据:[docs/benchmark.md](docs/benchmark.md)
+
+---
+
 ## 🗺️ Roadmap
 
 > 采用「完成即划掉」的待办清单风格，随项目推进持续更新。
