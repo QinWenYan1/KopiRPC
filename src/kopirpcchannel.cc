@@ -22,14 +22,13 @@
 #include "rpcheader.pb.h"
 #include "zookeeperutil.h"
 
-
 // d2: ZK 地址缓存 —— methodPath -> "ip:port"
 // 命中则跳过整个 ZK 会话(Start+GetData 是一次完整 TCP 会话,每次调用的大头开销)
 // mutex 护 map: CallMethod 会被多线程并发调(bench 就是 8 线程)
-// 已知限制(挂账): 缓存不过期 —— provider 换地址/重启后旧缓存仍在,失效/watcher 留后续
+// 已知限制(挂账): 缓存不过期 —— provider 换地址/重启后旧缓存仍在,失效/watcher
+// 留后续
 static std::unordered_map<std::string, std::string> s_addrCache;
 static std::mutex s_addrCacheMtx;
-
 
 /*
  * 数据格式：
@@ -107,7 +106,8 @@ void KopiRpcChannel::CallMethod(
     ZkClient zkCli;
     zkCli.Start();
     // 从指定路径拿到指定数据 -> 127.0.0.1:8000
-    data = zkCli.GetData(methodPath.c_str());  // 从指定路径拿到数据 -> 127.0.0.1:8000
+    data = zkCli.GetData(
+        methodPath.c_str());  // 从指定路径拿到数据 -> 127.0.0.1:8000
     if (!data.empty()) {
       std::lock_guard<std::mutex> lock(s_addrCacheMtx);
       s_addrCache[methodPath] = data;
