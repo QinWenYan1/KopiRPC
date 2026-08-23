@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include <atomic>
+#include <chrono>
 #include <thread>
 
 #include "kopiconnectpool.h"
@@ -40,14 +41,28 @@ struct FakeServer {
     acceptThread = std::thread([this] {
       while (accept(lfd, nullptr, nullptr) >= 0) {
         ++accepted;
-      }  // close(lfd) 后 accept 返回 -1,线程退出
+      }  // shutdown(lfd) 后 accept 返回 -1,线程退出
     });
   }
   ~FakeServer() {
+    // Linux 的 close 唤不醒"已阻塞在 accept 里"的线程(不保证),
+    // 先 shutdown 让 accept 立即返回 -1(EINVAL),线程才能退出
+    shutdown(lfd, SHUT_RDWR);
     close(lfd);
     acceptThread.join();
   }
 };
+
+// accept 计数是异步的: connect 成功只代表内核完成了握手(backlog 接住),
+// accept() 何时返回取决于 accept 线程何时被调度 —— 直接断言计数是竞态,
+// 轮询等它到位(带 1s 超时)
+bool WaitAccepted(const FakeServer& srv, int want) {
+  for (int i = 0; i < 1000; ++i) {
+    if (srv.accepted.load() >= want) return true;
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
+  return false;
+}
 
 }  // namespace
 
@@ -76,6 +91,7 @@ TEST(ConnectPool, ReturnedConnectionIsReused) {
   pool.ReturnConnection("127.0.0.1", srv.port, fd2, false);
 
   // 复用的铁证: 假服务器只 accept 到 1 次(没有第二次握手)
+  ASSERT_TRUE(WaitAccepted(srv, 1));
   EXPECT_EQ(1, srv.accepted.load());
 }
 
@@ -93,5 +109,6 @@ TEST(ConnectPool, BadConnectionIsBurnedNotReused) {
   pool.ReturnConnection("127.0.0.1", srv.port, fd2, false);
 
   // 焚毁的铁证: 假服务器 accept 到 2 次(第二次是新建的)
+  ASSERT_TRUE(WaitAccepted(srv, 2));
   EXPECT_EQ(2, srv.accepted.load());
 }
