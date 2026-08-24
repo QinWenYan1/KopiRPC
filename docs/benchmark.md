@@ -94,8 +94,7 @@ docker run -it --rm -v "$(pwd)":/workspace -w /workspace cspenguin/qwenrpc-dev:l
 ./autobuild.sh
 ```
 
-> `bin/` 里没有 `provider`/`bench`? → 打开根 CMakeLists.txt,
-> 确认 `add_subdirectory(example)` 没被注释(出包态会注释它),取消注释后重新构建。
+> `provider` / `bench` 属于 example,随仓库构建自动产出到 `bin/`,无需额外开关。
 
 **2. 起 ZooKeeper**
 
@@ -143,3 +142,5 @@ QPS: ~12000
 
 **顺带可看**:provider 日志里 `newConnection` 条数 —— 连接池复用时,
 单线程 1000 次调用只有 ~1 条(优化前是 1000 条)。
+
+---
