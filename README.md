@@ -2,7 +2,7 @@
 
 >KopiRPC (Kopi Remote Procedure Call) —— C++ 高性能远程程序调用服务框架
 
-![License](https://img.shields.io/github/license/QinWenYan1/KopiRPC) ![C++17](https://img.shields.io/badge/dialect-C%2B%2B17-blue) ![Platform](https://img.shields.io/badge/platform-Linux%20arm64-orange) ![Version](https://img.shields.io/github/v/release/QinWenYan1/KopiRPC)
+![License](https://img.shields.io/github/license/QinWenYan1/KopiRPC) ![C++17](https://img.shields.io/badge/dialect-C%2B%2B17-blue) ![Platform](https://img.shields.io/badge/platform-Linux%20arm64-orange) ![Version](https://img.shields.io/github/v/release/QinWenYan1/KopiRPC) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/QinWenYan1/KopiRPC)
 
 ---
 
