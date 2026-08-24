@@ -17,3 +17,6 @@ compile_commands.json
 
 # 本地配置文件 .conf 
 *.conf
+
+# 出包产物(package.sh)
+*.tar.gz
